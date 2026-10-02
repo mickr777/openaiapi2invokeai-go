@@ -197,7 +197,7 @@ var Presets = []Preset{
 		Label:            "Qwen Image (1024x1024, text-to-image + image edit)",
 		WorkflowFile:     "qwen-image-text-to-image.json",
 		WorkflowJSON:     qwenImageWorkflowJSON,
-		EditWorkflowFile: "qwen-image-image-edit.json",
+		EditWorkflowFile: "qwen-image-edit.json",
 		EditWorkflowJSON: qwenImageImgWorkflowJSON,
 		SubModels: []SubModel{
 			{Field: "qwen_vl_encoder_model", ModelType: "qwen_vl_encoder", Base: "any",
@@ -207,8 +207,8 @@ var Presets = []Preset{
 		Entry: workflow.ModelEntry{
 			ID:              "qwenimage",
 			Workflow:        "qwen-image-text-to-image.json",
-			EditWorkflow:    "qwen-image-image-edit.json",
-			VariantWorkflow: "qwen-image-image-edit.json",
+			EditWorkflow:    "qwen-image-edit.json",
+			VariantWorkflow: "qwen-image-edit.json",
 			Mapping: workflow.FieldMapping{
 				Prompt:  "nodes.text_encoder.prompt",
 				Seed:    "nodes.denoise.seed",
