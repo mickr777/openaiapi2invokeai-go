@@ -48,7 +48,12 @@ func main() {
 	log.Info("registry loaded", "models", len(registry.List()))
 
 	// Initialize InvokeAI client
-	invokeClient := invoke.NewClient(cfg.InvokeURL, cfg.Timeout, log)
+	invokeClient := invoke.NewClientWithOptions(cfg.InvokeURL, cfg.Timeout, log, invoke.ClientOptions{
+		AuthMode: cfg.InvokeAuthMode,
+		Email:    cfg.InvokeEmail,
+		Password: cfg.InvokePassword,
+		Version:  cfg.InvokeVersion,
+	})
 
 	srv := server.New(cfg, log, invokeClient, registry)
 
