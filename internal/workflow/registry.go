@@ -22,13 +22,19 @@ type RegistryData struct {
 
 // ModelEntry maps an OpenAI model ID to an InvokeAI workflow + parameters.
 type ModelEntry struct {
-	ID              string            `json:"id"`
-	Workflow        string            `json:"workflow"`
-	EditWorkflow    string            `json:"edit_workflow,omitempty"`    // inpainting workflow
-	VariantWorkflow string            `json:"variant_workflow,omitempty"` // img2img workflow
-	Defaults        map[string]any    `json:"defaults,omitempty"`
-	Mapping         FieldMapping      `json:"mapping"`
-	SizePresets     map[string]Size   `json:"size_presets,omitempty"`
+	ID                string         `json:"id"`
+	Workflow          string         `json:"workflow"`
+	EditWorkflow      string         `json:"edit_workflow,omitempty"`
+	VariantWorkflow   string         `json:"variant_workflow,omitempty"`
+	OutputNode        string         `json:"output_node,omitempty"`
+	EditOutputNode    string         `json:"edit_output_node,omitempty"`
+	VariantOutputNode string         `json:"variant_output_node,omitempty"`
+	Defaults          map[string]any `json:"defaults,omitempty"`
+	Mapping           FieldMapping   `json:"mapping,omitempty"`
+	GenerationMapping FieldMapping   `json:"generation_mapping,omitempty"`
+	EditMapping       FieldMapping   `json:"edit_mapping,omitempty"`
+	VariantMapping    FieldMapping   `json:"variant_mapping,omitempty"`
+	SizePresets       map[string]Size `json:"size_presets,omitempty"`
 }
 
 // FieldMapping defines which graph fields to substitute for OpenAI parameters.
@@ -49,6 +55,52 @@ type FieldMapping struct {
 type Size struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
+}
+
+func (m FieldMapping) IsZero() bool {
+	return m == (FieldMapping{})
+}
+
+func (m ModelEntry) MappingFor(role string) FieldMapping {
+	switch role {
+	case "edit":
+		if !m.EditMapping.IsZero() {
+			return m.EditMapping
+		}
+	case "variant":
+		if !m.VariantMapping.IsZero() {
+			return m.VariantMapping
+		}
+		if !m.EditMapping.IsZero() {
+			return m.EditMapping
+		}
+	default:
+		if !m.GenerationMapping.IsZero() {
+			return m.GenerationMapping
+		}
+	}
+	return m.Mapping
+}
+
+func (m ModelEntry) OutputNodeFor(role string) string {
+	switch role {
+	case "edit":
+		if m.EditOutputNode != "" {
+			return m.EditOutputNode
+		}
+	case "variant":
+		if m.VariantOutputNode != "" {
+			return m.VariantOutputNode
+		}
+		if m.EditOutputNode != "" {
+			return m.EditOutputNode
+		}
+	default:
+		if m.OutputNode != "" {
+			return m.OutputNode
+		}
+	}
+	return ""
 }
 
 // NewRegistry loads or creates the registry at the given data directory.
