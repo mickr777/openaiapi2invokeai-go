@@ -106,20 +106,21 @@ func (s *Server) handleImageEdits(w http.ResponseWriter, r *http.Request) {
 			Seed:   -1,
 		}
 
-		graph, err := workflow.BuildGraphFromFile(s.cfg.DataDir, workflowFile, entry, params)
+		graph, err := workflow.BuildGraphForRole(s.cfg.DataDir, workflowFile, entry, params, "edit")
 		if err != nil {
 			s.writeError(w, http.StatusInternalServerError, "server_error", "build graph: "+err.Error())
 			return
 		}
 
-		if entry.Mapping.Image != "" {
-			workflow.SetGraphField(graph, entry.Mapping.Image, imageField(imageName))
+		mapping := entry.MappingFor("edit")
+		if mapping.Image != "" {
+			workflow.SetGraphField(graph, mapping.Image, imageField(imageName))
 		}
-		if maskName != "" && entry.Mapping.Mask != "" {
-			workflow.SetGraphField(graph, entry.Mapping.Mask, imageField(maskName))
+		if maskName != "" && mapping.Mask != "" {
+			workflow.SetGraphField(graph, mapping.Mask, imageField(maskName))
 		}
 
-		imgData, err := s.generateImage(r.Context(), graph)
+		imgData, err := s.generateImage(r.Context(), graph, entry.OutputNodeFor("edit"))
 		if err != nil {
 			s.writeError(w, http.StatusInternalServerError, "server_error", "generation failed: "+err.Error())
 			return
@@ -207,22 +208,23 @@ func (s *Server) handleImageVariations(w http.ResponseWriter, r *http.Request) {
 			Seed:   -1,
 		}
 
-		graph, err := workflow.BuildGraphFromFile(s.cfg.DataDir, workflowFile, entry, params)
+		graph, err := workflow.BuildGraphForRole(s.cfg.DataDir, workflowFile, entry, params, "variant")
 		if err != nil {
 			s.writeError(w, http.StatusInternalServerError, "server_error", "build graph: "+err.Error())
 			return
 		}
 
-		if entry.Mapping.Image != "" {
-			workflow.SetGraphField(graph, entry.Mapping.Image, imageField(imageName))
+		mapping := entry.MappingFor("variant")
+		if mapping.Image != "" {
+			workflow.SetGraphField(graph, mapping.Image, imageField(imageName))
 		}
 
 		// Set high denoising for variations
-		if entry.Mapping.Denoise != "" {
-			workflow.SetGraphField(graph, entry.Mapping.Denoise, 0.75)
+		if mapping.Denoise != "" {
+			workflow.SetGraphField(graph, mapping.Denoise, 0.75)
 		}
 
-		imgData, err := s.generateImage(r.Context(), graph)
+		imgData, err := s.generateImage(r.Context(), graph, entry.OutputNodeFor("variant"))
 		if err != nil {
 			s.writeError(w, http.StatusInternalServerError, "server_error", "generation failed: "+err.Error())
 			return
