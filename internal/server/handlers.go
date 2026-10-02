@@ -120,7 +120,7 @@ func (s *Server) handleImageGenerations(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Resolve size
-	width, height, err := workflow.ResolveSize(entry, req.Size)
+	width, height, err := workflow.ResolveGenerationSize(entry, req.Size, req.Prompt)
 	if err != nil {
 		s.writeError(w, http.StatusBadRequest, "invalid_request_error", err.Error())
 		return

@@ -351,7 +351,7 @@ func (h *Handler) testGenerate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	width, height, _ := workflow.ResolveSize(entry, size)
+	width, height, _ := workflow.ResolveGenerationSize(entry, size, prompt)
 
 	params := workflow.Params{
 		Prompt: prompt,
