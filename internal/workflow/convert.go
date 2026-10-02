@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Format identifies which JSON shape a workflow file uses.
@@ -60,6 +61,7 @@ func ParseWorkflow(data []byte) (*Parsed, error) {
 		if err := json.Unmarshal(data, &graph); err != nil {
 			return nil, fmt.Errorf("parse workflow: %w", err)
 		}
+		sanitizeEditorSentinels(graph)
 		return &Parsed{Format: FormatGraph, Graph: graph, Labels: map[string]string{}}, nil
 	case '[':
 		return convertEditorWorkflow(nodesRaw, root["edges"])
@@ -130,6 +132,11 @@ func convertEditorWorkflow(nodesRaw, edgesRaw json.RawMessage) (*Parsed, error) 
 			if err := json.Unmarshal(in.Value, &v); err != nil {
 				return nil, fmt.Errorf("parse workflow node %s field %s: %w", id, name, err)
 			}
+			if name == "board" {
+				if value, ok := v.(string); ok && strings.EqualFold(value, "auto") {
+					continue
+				}
+			}
 			node[name] = v
 		}
 		// Set last so an input never shadows the invocation identity.
@@ -196,4 +203,23 @@ func firstToken(raw json.RawMessage) byte {
 		}
 	}
 	return 0
+}
+
+// sanitizeEditorSentinels removes UI-only values that are invalid in the
+// InvokeAI API graph. "auto" is a Gallery destination choice in the editor,
+// not a valid BoardField value for enqueue_batch.
+func sanitizeEditorSentinels(graph map[string]any) {
+	nodes, ok := graph["nodes"].(map[string]any)
+	if !ok {
+		return
+	}
+	for _, raw := range nodes {
+		node, ok := raw.(map[string]any)
+		if !ok {
+			continue
+		}
+		if value, ok := node["board"].(string); ok && strings.EqualFold(value, "auto") {
+			delete(node, "board")
+		}
+	}
 }

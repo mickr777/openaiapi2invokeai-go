@@ -4,14 +4,14 @@ import "time"
 
 // EnqueueBatchRequest is the payload for POST /api/v1/queue/{queue_id}/enqueue_batch
 type EnqueueBatchRequest struct {
-	Batch  Batch `json:"batch"`
-	Prepend bool `json:"prepend,omitempty"`
+	Batch   Batch `json:"batch"`
+	Prepend bool  `json:"prepend,omitempty"`
 }
 
 type Batch struct {
-	Graph Graph  `json:"graph"`
-	Runs  int    `json:"runs,omitempty"`
-	Data  []any  `json:"data,omitempty"`
+	Graph Graph `json:"graph"`
+	Runs  int   `json:"runs,omitempty"`
+	Data  []any `json:"data,omitempty"`
 }
 
 // Graph is an InvokeAI workflow graph (opaque JSON structure we parameterize externally).
@@ -68,9 +68,11 @@ type QueueItemDetail struct {
 	Origin      string `json:"origin"`
 	Destination string `json:"destination"`
 	Session     struct {
-		ID      string                      `json:"id"`
-		Graph   Graph                       `json:"graph"`
-		Results map[string]InvocationOutput `json:"results"`
+		ID                    string                      `json:"id"`
+		Graph                 Graph                       `json:"graph"`
+		ExecutionGraph        Graph                       `json:"execution_graph"`
+		PreparedSourceMapping map[string]string           `json:"prepared_source_mapping"`
+		Results               map[string]InvocationOutput `json:"results"`
 	} `json:"session"`
 }
 

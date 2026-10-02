@@ -45,6 +45,11 @@ func (s *Server) handleImageEdits(w http.ResponseWriter, r *http.Request) {
 	// Read mask (optional)
 	maskData, _ := readFormFile(r, "mask")
 
+	if _, err := s.invoke.VerifyVersion(r.Context()); err != nil {
+		s.writeError(w, http.StatusBadGateway, "server_error", "InvokeAI compatibility check failed: "+err.Error())
+		return
+	}
+
 	// Resolve model
 	entry, ok := s.resolveModel(modelID)
 	if !ok {
@@ -58,14 +63,14 @@ func (s *Server) handleImageEdits(w http.ResponseWriter, r *http.Request) {
 		workflowFile = entry.Workflow
 	}
 
-	width, height, err := workflow.ResolveSize(entry, size)
+	// For edits, auto/omitted size first honors explicit prompt dimensions or
+	// orientation hints, then falls back to the source image dimensions.
+	width, height, err := workflow.ResolveGenerationSize(entry, size, prompt)
 	if err != nil {
 		s.writeError(w, http.StatusBadRequest, "invalid_request_error", err.Error())
 		return
 	}
 
-	// Without an explicit size the graph has to follow the image, not the other
-	// way round, or denoising fails on a tensor mismatch.
 	if width == 0 || height == 0 {
 		width, height, err = imageDimensions(imageData)
 		if err != nil {
@@ -101,20 +106,21 @@ func (s *Server) handleImageEdits(w http.ResponseWriter, r *http.Request) {
 			Seed:   -1,
 		}
 
-		graph, err := workflow.BuildGraphFromFile(s.cfg.DataDir, workflowFile, entry, params)
+		graph, err := workflow.BuildGraphForRole(s.cfg.DataDir, workflowFile, entry, params, "edit")
 		if err != nil {
 			s.writeError(w, http.StatusInternalServerError, "server_error", "build graph: "+err.Error())
 			return
 		}
 
-		if entry.Mapping.Image != "" {
-			workflow.SetGraphField(graph, entry.Mapping.Image, imageField(imageName))
+		mapping := entry.MappingFor("edit")
+		if mapping.Image != "" {
+			workflow.SetGraphField(graph, mapping.Image, imageField(imageName))
 		}
-		if maskName != "" && entry.Mapping.Mask != "" {
-			workflow.SetGraphField(graph, entry.Mapping.Mask, imageField(maskName))
+		if maskName != "" && mapping.Mask != "" {
+			workflow.SetGraphField(graph, mapping.Mask, imageField(maskName))
 		}
 
-		imgData, err := s.generateImage(r.Context(), graph)
+		imgData, err := s.generateImage(r.Context(), graph, entry.OutputNodeFor("edit"))
 		if err != nil {
 			s.writeError(w, http.StatusInternalServerError, "server_error", "generation failed: "+err.Error())
 			return
@@ -149,6 +155,11 @@ func (s *Server) handleImageVariations(w http.ResponseWriter, r *http.Request) {
 	imageData, err := readFormFile(r, "image")
 	if err != nil {
 		s.writeError(w, http.StatusBadRequest, "invalid_request_error", "image is required: "+err.Error())
+		return
+	}
+
+	if _, err := s.invoke.VerifyVersion(r.Context()); err != nil {
+		s.writeError(w, http.StatusBadGateway, "server_error", "InvokeAI compatibility check failed: "+err.Error())
 		return
 	}
 
@@ -197,22 +208,23 @@ func (s *Server) handleImageVariations(w http.ResponseWriter, r *http.Request) {
 			Seed:   -1,
 		}
 
-		graph, err := workflow.BuildGraphFromFile(s.cfg.DataDir, workflowFile, entry, params)
+		graph, err := workflow.BuildGraphForRole(s.cfg.DataDir, workflowFile, entry, params, "variant")
 		if err != nil {
 			s.writeError(w, http.StatusInternalServerError, "server_error", "build graph: "+err.Error())
 			return
 		}
 
-		if entry.Mapping.Image != "" {
-			workflow.SetGraphField(graph, entry.Mapping.Image, imageField(imageName))
+		mapping := entry.MappingFor("variant")
+		if mapping.Image != "" {
+			workflow.SetGraphField(graph, mapping.Image, imageField(imageName))
 		}
 
 		// Set high denoising for variations
-		if entry.Mapping.Denoise != "" {
-			workflow.SetGraphField(graph, entry.Mapping.Denoise, 0.75)
+		if mapping.Denoise != "" {
+			workflow.SetGraphField(graph, mapping.Denoise, 0.75)
 		}
 
-		imgData, err := s.generateImage(r.Context(), graph)
+		imgData, err := s.generateImage(r.Context(), graph, entry.OutputNodeFor("variant"))
 		if err != nil {
 			s.writeError(w, http.StatusInternalServerError, "server_error", "generation failed: "+err.Error())
 			return

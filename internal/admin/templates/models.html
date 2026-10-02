@@ -54,7 +54,8 @@
     </div>
   </div>
 
-  <h3>Field Mapping</h3>
+  <h3>Generation Mapping</h3>
+  <div class="form-group"><label>Final Output Node</label><input type="text" name="output_node" placeholder="exact final image node ID" value="{{.Model.OutputNode}}"></div>
   <p style="font-size:0.8rem;color:var(--text-muted)">Format: nodes.&lt;node-id&gt;.&lt;field&gt; &mdash; the Inspect page of a workflow lists every node ID and field.</p>
   <div class="grid grid-2">
     <div class="form-group"><label>Prompt</label><input type="text" name="map_prompt" placeholder="nodes.xxx.value" value="{{.Model.Mapping.Prompt}}"></div>
@@ -66,12 +67,29 @@
     <div class="form-group"><label>CFG</label><input type="text" name="map_cfg" placeholder="nodes.xxx.cfg_scale" value="{{.Model.Mapping.CFG}}"></div>
   </div>
 
-  <h4 style="margin-top:1rem">Image Input <span style="font-weight:400;color:var(--text-muted);font-size:0.8rem">&mdash; for /v1/images/edits and /variations</span></h4>
+  <h4 style="margin-top:1rem">Generation Image Input <span style="font-weight:400;color:var(--text-muted);font-size:0.8rem">&mdash; usually empty for txt2img</span></h4>
   <div class="grid grid-2">
     <div class="form-group"><label>Image</label><input type="text" name="map_image" placeholder="nodes.xxx.image" value="{{.Model.Mapping.Image}}"></div>
     <div class="form-group"><label>Mask</label><input type="text" name="map_mask" placeholder="nodes.xxx.image" value="{{.Model.Mapping.Mask}}"></div>
     <div class="form-group"><label>Denoise</label><input type="text" name="map_denoise" placeholder="nodes.xxx.denoising_start" value="{{.Model.Mapping.Denoise}}"></div>
   </div>
+
+  <h3>Edit Mapping</h3>
+  <p style="font-size:0.8rem;color:var(--text-muted)">Used by /v1/images/edits. Empty edit fields fall back to the generation mapping.</p>
+  <div class="form-group"><label>Edit Final Output Node</label><input type="text" name="edit_output_node" placeholder="exact final image node ID" value="{{.Model.EditOutputNode}}"></div>
+  <div class="grid grid-2">
+    <div class="form-group"><label>Prompt</label><input type="text" name="edit_map_prompt" value="{{.Model.EditMapping.Prompt}}"></div>
+    <div class="form-group"><label>Negative</label><input type="text" name="edit_map_negative" value="{{.Model.EditMapping.Negative}}"></div>
+    <div class="form-group"><label>Width</label><input type="text" name="edit_map_width" value="{{.Model.EditMapping.Width}}"></div>
+    <div class="form-group"><label>Height</label><input type="text" name="edit_map_height" value="{{.Model.EditMapping.Height}}"></div>
+    <div class="form-group"><label>Seed</label><input type="text" name="edit_map_seed" value="{{.Model.EditMapping.Seed}}"></div>
+    <div class="form-group"><label>Steps</label><input type="text" name="edit_map_steps" value="{{.Model.EditMapping.Steps}}"></div>
+    <div class="form-group"><label>CFG</label><input type="text" name="edit_map_cfg" value="{{.Model.EditMapping.CFG}}"></div>
+    <div class="form-group"><label>Image</label><input type="text" name="edit_map_image" placeholder="nodes.xxx.image" value="{{.Model.EditMapping.Image}}"></div>
+    <div class="form-group"><label>Mask</label><input type="text" name="edit_map_mask" value="{{.Model.EditMapping.Mask}}"></div>
+    <div class="form-group"><label>Denoise</label><input type="text" name="edit_map_denoise" value="{{.Model.EditMapping.Denoise}}"></div>
+  </div>
+  <div class="form-group"><label>Variation Final Output Node <span style="color:var(--text-muted)">(optional; defaults to edit output)</span></label><input type="text" name="variant_output_node" value="{{.Model.VariantOutputNode}}"></div>
 
   <h3>Size Presets</h3>
   <div class="form-group">
@@ -98,7 +116,9 @@
     <td class="mono" style="font-size:0.75rem">{{.Mapping.Prompt}}</td>
     <td style="font-size:0.75rem">
       generations
-      {{if .Mapping.Image}}<br>edits &middot; variations{{else}}<br><span style="color:var(--text-muted)">no image mapping</span>{{end}}
+      {{if .SupportsEdit}}<br>edits{{end}}
+      {{if .SupportsVariation}}<br>variations{{end}}
+      {{if and (not .SupportsEdit) (not .SupportsVariation)}}<br><span style="color:var(--text-muted)">no image endpoint mapping</span>{{end}}
     </td>
     <td>
       <button hx-get="/admin/models/edit/{{.ID}}" hx-target="#model-form" hx-swap="innerHTML" class="btn btn-sm">Edit</button>

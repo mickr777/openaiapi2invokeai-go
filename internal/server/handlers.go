@@ -101,6 +101,11 @@ func (s *Server) handleImageGenerations(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	if _, err := s.invoke.VerifyVersion(r.Context()); err != nil {
+		s.writeError(w, http.StatusBadGateway, "server_error", "InvokeAI compatibility check failed: "+err.Error())
+		return
+	}
+
 	// Look up model in registry
 	modelID := req.Model
 	if modelID == "" {
@@ -120,7 +125,7 @@ func (s *Server) handleImageGenerations(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Resolve size
-	width, height, err := workflow.ResolveSize(entry, req.Size)
+	width, height, err := workflow.ResolveGenerationSize(entry, req.Size, req.Prompt)
 	if err != nil {
 		s.writeError(w, http.StatusBadRequest, "invalid_request_error", err.Error())
 		return
@@ -149,7 +154,7 @@ func (s *Server) handleImageGenerations(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		imgData, err := s.generateImage(r.Context(), graph)
+		imgData, err := s.generateImage(r.Context(), graph, entry.OutputNodeFor("generation"))
 		if err != nil {
 			s.writeError(w, http.StatusInternalServerError, "server_error", "generation failed: "+err.Error())
 			return
@@ -169,7 +174,7 @@ func (s *Server) handleImageGenerations(w http.ResponseWriter, r *http.Request) 
 }
 
 // generateImage enqueues a graph, waits for completion, and returns image bytes.
-func (s *Server) generateImage(ctx context.Context, graph map[string]any) ([]byte, error) {
+func (s *Server) generateImage(ctx context.Context, graph map[string]any, outputNode string) ([]byte, error) {
 	resp, err := s.invoke.EnqueueBatch(ctx, invoke.Graph(graph))
 	if err != nil {
 		return nil, fmt.Errorf("enqueue: %w", err)
@@ -199,13 +204,13 @@ func (s *Server) generateImage(ctx context.Context, graph map[string]any) ([]byt
 		return nil, fmt.Errorf("get results: %w", err)
 	}
 
-	names := s.invoke.GetImageNames(detail)
-	if len(names) == 0 {
-		return nil, fmt.Errorf("no images in output")
+	resultNode, imageName, err := invoke.SelectImageResult(detail, invoke.Graph(graph), outputNode)
+	if err != nil {
+		return nil, fmt.Errorf("select final image: %w", err)
 	}
+	s.log.Debug("selected final image", "result_node", resultNode, "image_name", imageName)
 
-	// Fetch the last image (typically the final output)
-	imgBytes, _, err := s.invoke.GetImageBytes(ctx, names[len(names)-1])
+	imgBytes, _, err := s.invoke.GetImageBytes(ctx, imageName)
 	if err != nil {
 		return nil, fmt.Errorf("fetch image: %w", err)
 	}

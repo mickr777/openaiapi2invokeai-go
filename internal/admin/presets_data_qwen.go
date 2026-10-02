@@ -10,7 +10,7 @@ package admin
 // buildKrea2Graph / buildAnimaGraph / buildQwenImageGraph.
 
 const krea2WorkflowJSON = `{
-  "id": "krea2-txt2img",
+  "id": "krea2-text-to-image",
   "nodes": {
     "model_loader": {
       "id": "model_loader",
@@ -53,7 +53,7 @@ const krea2WorkflowJSON = `{
 }`
 
 const krea2ImgWorkflowJSON = `{
-  "id": "krea2-img2img",
+  "id": "krea2-image-edit",
   "nodes": {
     "model_loader": {
       "id": "model_loader",
@@ -102,7 +102,7 @@ const krea2ImgWorkflowJSON = `{
 // Qwen3-0.6B, a 4B encoder fails with a shape mismatch during denoising.
 
 const animaWorkflowJSON = `{
-  "id": "anima-txt2img",
+  "id": "anima-text-to-image",
   "nodes": {
     "model_loader": {
       "id": "model_loader",
@@ -147,7 +147,7 @@ const animaWorkflowJSON = `{
 }`
 
 const animaImgWorkflowJSON = `{
-  "id": "anima-img2img",
+  "id": "anima-image-edit",
   "nodes": {
     "model_loader": {
       "id": "model_loader",
@@ -195,7 +195,7 @@ const animaImgWorkflowJSON = `{
 }`
 
 const qwenImageWorkflowJSON = `{
-  "id": "qwenimage-txt2img",
+  "id": "qwen-image-text-to-image",
   "nodes": {
     "model_loader": {
       "id": "model_loader",
@@ -236,7 +236,7 @@ const qwenImageWorkflowJSON = `{
 }`
 
 const qwenImageImgWorkflowJSON = `{
-  "id": "qwenimage-img2img",
+  "id": "qwen-image-edit",
   "nodes": {
     "model_loader": {
       "id": "model_loader",

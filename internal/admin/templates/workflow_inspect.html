@@ -3,6 +3,67 @@
 <a href="/admin/workflows">&larr; Back to workflows</a>
 
 <div class="card mt-1">
+  <h3>Detected Configuration</h3>
+  <p>This is a review-only suggestion. Nothing is saved until you confirm below.</p>
+
+  <table>
+    <tr><th>Detected model</th><td><strong>{{.Suggestion.SuggestedModelID}}</strong>{{if .Suggestion.ModelName}} <small>({{.Suggestion.ModelName}})</small>{{end}}</td></tr>
+    <tr><th>Workflow role</th><td>{{.Suggestion.WorkflowType}}</td></tr>
+    <tr><th>Final output node</th><td class="mono">{{if .Suggestion.OutputNode}}{{.Suggestion.OutputNode}}{{else}}&mdash;{{end}}</td></tr>
+    <tr><th>Prompt</th><td class="mono">{{.Suggestion.Mapping.Prompt}}</td></tr>
+    <tr><th>Seed</th><td class="mono">{{.Suggestion.Mapping.Seed}}</td></tr>
+    <tr><th>Width</th><td class="mono">{{.Suggestion.Mapping.Width}}</td></tr>
+    <tr><th>Height</th><td class="mono">{{.Suggestion.Mapping.Height}}</td></tr>
+    <tr><th>Steps</th><td class="mono">{{.Suggestion.Mapping.Steps}}</td></tr>
+    <tr><th>CFG</th><td class="mono">{{.Suggestion.Mapping.CFG}}</td></tr>
+    <tr><th>Image</th><td class="mono">{{.Suggestion.Mapping.Image}}</td></tr>
+    <tr><th>Denoise</th><td class="mono">{{.Suggestion.Mapping.Denoise}}</td></tr>
+  </table>
+
+  {{if .Suggestion.Warnings}}
+  <div class="mt-1">
+    <strong>Review notes</strong>
+    <ul>{{range .Suggestion.Warnings}}<li>{{.}}</li>{{end}}</ul>
+  </div>
+  {{end}}
+
+  {{if .Suggestion.Blocking}}
+  <div class="mt-1">
+    <strong>Cannot auto-configure yet</strong>
+    <ul>{{range .Suggestion.Blocking}}<li>{{.}}</li>{{end}}</ul>
+    <p>Use the node table below and configure this workflow manually.</p>
+  </div>
+  {{else}}
+  <form method="post" action="/admin/workflows/auto-configure/{{.Filename}}" class="mt-1">
+    <div class="grid grid-2">
+      <div class="form-group">
+        <label>Model ID</label>
+        <input type="text" name="model_id" value="{{.Suggestion.SuggestedModelID}}" required>
+        {{if .ModelExists}}<small>A model with this ID already exists. Edit workflows will attach to it; generation workflows require overwrite confirmation if they differ.</small>{{end}}
+      </div>
+      <div class="form-group">
+        <label>Workflow role</label>
+        <select name="role">
+          <option value="generation"{{if eq .Suggestion.WorkflowType "generation"}} selected{{end}}>Generation</option>
+          <option value="edit"{{if eq .Suggestion.WorkflowType "edit"}} selected{{end}}>Edit</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label><input type="checkbox" name="also_variation" value="yes"> Also use an edit workflow for /v1/images/variations</label>
+    </div>
+    <div class="form-group">
+      <label><input type="checkbox" name="overwrite" value="yes"> Allow replacing an existing workflow assignment for this model</label>
+    </div>
+    <div class="form-group">
+      <label><input type="checkbox" name="confirm" value="yes" required> I reviewed the detected mappings and output node</label>
+    </div>
+    <button type="submit" class="btn">Save Detected Configuration</button>
+  </form>
+  {{end}}
+</div>
+
+<div class="card mt-1">
   <h3>Nodes ({{len .Nodes}})</h3>
   <table>
     <tr><th>Type</th><th>ID</th><th>Key Fields</th></tr>

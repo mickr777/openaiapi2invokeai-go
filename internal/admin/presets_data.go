@@ -1,7 +1,7 @@
 package admin
 
 const sdxlWorkflowJSON = `{
-  "id": "sdxl-txt2img",
+  "id": "sdxl-text-to-image",
   "nodes": {
     "model_loader": {
       "id": "model_loader",
@@ -69,7 +69,7 @@ const sdxlWorkflowJSON = `{
 }`
 
 const fluxWorkflowJSON = `{
-  "id": "flux-txt2img",
+  "id": "flux-text-to-image",
   "nodes": {
     "model_loader": {
       "id": "model_loader",
@@ -118,7 +118,7 @@ const fluxWorkflowJSON = `{
 }`
 
 const zimageWorkflowJSON = `{
-  "id": "zimage-txt2img",
+  "id": "z-image-text-to-image",
   "nodes": {
     "model_loader": {
       "id": "model_loader",
@@ -166,7 +166,7 @@ const zimageWorkflowJSON = `{
 }`
 
 const flux2kleinWorkflowJSON = `{
-  "id": "flux2klein-txt2img",
+  "id": "flux2-klein-text-to-image",
   "nodes": {
     "model_loader": {
       "id": "model_loader",
@@ -216,7 +216,7 @@ const flux2kleinWorkflowJSON = `{
 }`
 
 const sd15WorkflowJSON = `{
-  "id": "sd15-txt2img",
+  "id": "sd15-text-to-image",
   "nodes": {
     "model_loader": {
       "id": "model_loader",

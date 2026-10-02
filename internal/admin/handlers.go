@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Pfannkuchensack/openaiapi2invokeai-go/internal/config"
@@ -91,6 +92,7 @@ func (h *Handler) Routes() chi.Router {
 	r.Post("/workflows/upload", h.workflowUpload)
 	r.Delete("/workflows/{name}", h.workflowDelete)
 	r.Get("/workflows/inspect/{name}", h.workflowInspect)
+	r.Post("/workflows/auto-configure/{name}", h.workflowAutoConfigure)
 	r.Get("/models", h.models)
 	r.Get("/models/new", h.modelNew)
 	r.Get("/models/edit/{id}", h.modelEdit)
@@ -222,13 +224,110 @@ func (h *Handler) workflowInspect(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	suggestion, err := workflow.SuggestWorkflow(h.cfg.DataDir, name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_, modelExists := h.registry.Get(suggestion.SuggestedModelID)
 
 	h.render(w, "workflow_inspect.html", map[string]any{
-		"Title":    "Inspect " + name,
-		"Nav":      "workflows",
-		"Filename": name,
-		"Nodes":    nodes,
+		"Title":       "Inspect " + name,
+		"Nav":         "workflows",
+		"Filename":    name,
+		"Nodes":       nodes,
+		"Suggestion":  suggestion,
+		"ModelExists": modelExists,
 	})
+}
+
+func (h *Handler) workflowAutoConfigure(w http.ResponseWriter, r *http.Request) {
+	name := chi.URLParam(r, "name")
+	if filepath.Base(name) != name || filepath.Ext(name) != ".json" {
+		http.Error(w, "invalid workflow filename", http.StatusBadRequest)
+		return
+	}
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "invalid form", http.StatusBadRequest)
+		return
+	}
+	if r.FormValue("confirm") != "yes" {
+		http.Error(w, "review the detected mappings and confirm before saving", http.StatusBadRequest)
+		return
+	}
+
+	suggestion, err := workflow.SuggestWorkflow(h.cfg.DataDir, name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if len(suggestion.Blocking) > 0 {
+		http.Error(w, "auto-configure is blocked: "+strings.Join(suggestion.Blocking, " "), http.StatusConflict)
+		return
+	}
+
+	modelID := strings.TrimSpace(r.FormValue("model_id"))
+	if modelID == "" {
+		modelID = suggestion.SuggestedModelID
+	}
+	if modelID == "" {
+		http.Error(w, "model ID is required", http.StatusBadRequest)
+		return
+	}
+
+	role := strings.ToLower(strings.TrimSpace(r.FormValue("role")))
+	if role == "" {
+		role = suggestion.WorkflowType
+	}
+	if role != "generation" && role != "edit" {
+		http.Error(w, "workflow role must be generation or edit", http.StatusBadRequest)
+		return
+	}
+	overwrite := r.FormValue("overwrite") == "yes"
+
+	entry, exists := h.registry.Get(modelID)
+	if role == "generation" {
+		if exists && entry.Workflow != "" && entry.Workflow != name && !overwrite {
+			http.Error(w, "model already has a different generation workflow; confirm overwrite to replace it", http.StatusConflict)
+			return
+		}
+		if !exists {
+			entry = workflow.ModelEntry{ID: modelID}
+		}
+		entry.ID = modelID
+		entry.Workflow = name
+		entry.Mapping = suggestion.Mapping
+		entry.GenerationMapping = suggestion.Mapping
+		entry.OutputNode = suggestion.OutputNode
+	} else {
+		if suggestion.Mapping.Image == "" {
+			http.Error(w, "edit workflow has no unambiguous image input mapping", http.StatusConflict)
+			return
+		}
+		if !exists || entry.Workflow == "" {
+			http.Error(w, "add or auto-configure the generation workflow for this model before attaching an edit workflow", http.StatusConflict)
+			return
+		}
+		if entry.EditWorkflow != "" && entry.EditWorkflow != name && !overwrite {
+			http.Error(w, "model already has a different edit workflow; confirm overwrite to replace it", http.StatusConflict)
+			return
+		}
+		entry.EditWorkflow = name
+		entry.EditMapping = suggestion.Mapping
+		entry.EditOutputNode = suggestion.OutputNode
+		if r.FormValue("also_variation") == "yes" {
+			entry.VariantWorkflow = name
+			entry.VariantMapping = suggestion.Mapping
+			entry.VariantOutputNode = suggestion.OutputNode
+		}
+	}
+
+	if err := h.registry.Put(entry); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	h.log.Info("workflow auto-configured", "file", name, "model_id", modelID, "role", role)
+	http.Redirect(w, r, "/admin/models", http.StatusSeeOther)
 }
 
 // --- Models ---
@@ -272,23 +371,31 @@ func (h *Handler) modelEdit(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) modelSave(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
+	generationMapping := workflow.FieldMapping{
+		Prompt: r.FormValue("map_prompt"), Negative: r.FormValue("map_negative"),
+		Width: r.FormValue("map_width"), Height: r.FormValue("map_height"),
+		Seed: r.FormValue("map_seed"), Steps: r.FormValue("map_steps"),
+		CFG: r.FormValue("map_cfg"), Image: r.FormValue("map_image"),
+		Mask: r.FormValue("map_mask"), Denoise: r.FormValue("map_denoise"),
+	}
+	editMapping := workflow.FieldMapping{
+		Prompt: r.FormValue("edit_map_prompt"), Negative: r.FormValue("edit_map_negative"),
+		Width: r.FormValue("edit_map_width"), Height: r.FormValue("edit_map_height"),
+		Seed: r.FormValue("edit_map_seed"), Steps: r.FormValue("edit_map_steps"),
+		CFG: r.FormValue("edit_map_cfg"), Image: r.FormValue("edit_map_image"),
+		Mask: r.FormValue("edit_map_mask"), Denoise: r.FormValue("edit_map_denoise"),
+	}
 	entry := workflow.ModelEntry{
-		ID:              r.FormValue("id"),
-		Workflow:        r.FormValue("workflow"),
-		EditWorkflow:    r.FormValue("edit_workflow"),
-		VariantWorkflow: r.FormValue("variant_workflow"),
-		Mapping: workflow.FieldMapping{
-			Prompt:   r.FormValue("map_prompt"),
-			Negative: r.FormValue("map_negative"),
-			Width:    r.FormValue("map_width"),
-			Height:   r.FormValue("map_height"),
-			Seed:     r.FormValue("map_seed"),
-			Steps:    r.FormValue("map_steps"),
-			CFG:      r.FormValue("map_cfg"),
-			Image:    r.FormValue("map_image"),
-			Mask:     r.FormValue("map_mask"),
-			Denoise:  r.FormValue("map_denoise"),
-		},
+		ID:                r.FormValue("id"),
+		Workflow:          r.FormValue("workflow"),
+		EditWorkflow:      r.FormValue("edit_workflow"),
+		VariantWorkflow:   r.FormValue("variant_workflow"),
+		OutputNode:        r.FormValue("output_node"),
+		EditOutputNode:    r.FormValue("edit_output_node"),
+		VariantOutputNode: r.FormValue("variant_output_node"),
+		Mapping:           generationMapping,
+		GenerationMapping: generationMapping,
+		EditMapping:       editMapping,
 	}
 
 	// Parse size presets
@@ -351,7 +458,7 @@ func (h *Handler) testGenerate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	width, height, _ := workflow.ResolveSize(entry, size)
+	width, height, _ := workflow.ResolveGenerationSize(entry, size, prompt)
 
 	params := workflow.Params{
 		Prompt: prompt,
@@ -394,13 +501,13 @@ func (h *Handler) testGenerate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	names := h.invoke.GetImageNames(detail)
-	if len(names) == 0 {
-		h.renderFragment(w, "test-result", "test.html", map[string]any{"Error": "no images in output"})
+	_, imageName, err := invoke.SelectImageResult(detail, invoke.Graph(graph), entry.OutputNodeFor("generation"))
+	if err != nil {
+		h.renderFragment(w, "test-result", "test.html", map[string]any{"Error": "select final image: " + err.Error()})
 		return
 	}
 
-	imgBytes, _, err := h.invoke.GetImageBytes(r.Context(), names[len(names)-1])
+	imgBytes, _, err := h.invoke.GetImageBytes(r.Context(), imageName)
 	if err != nil {
 		h.renderFragment(w, "test-result", "test.html", map[string]any{"Error": "fetch image: " + err.Error()})
 		return
@@ -554,21 +661,13 @@ func (h *Handler) getInvokeModels(ctx context.Context) []InvokeModel {
 }
 
 func (h *Handler) fetchInvokeModels(ctx context.Context, modelType string) []InvokeModel {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, h.cfg.InvokeURL+"/api/v2/models/", nil)
-	if err != nil {
-		return nil
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil
-	}
-	defer resp.Body.Close()
-
 	var result struct {
 		Models []InvokeModel `json:"models"`
 	}
-	json.NewDecoder(resp.Body).Decode(&result)
+	if err := h.invoke.GetJSON(ctx, "/api/v2/models/", &result); err != nil {
+		h.log.Warn("fetch InvokeAI models", "error", err)
+		return nil
+	}
 
 	if modelType == "" {
 		return result.Models
@@ -774,30 +873,14 @@ func (h *Handler) listWorkflows() []WorkflowInfo {
 }
 
 func (h *Handler) getInvokeVersion(ctx context.Context) (string, error) {
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, h.cfg.InvokeURL+"/api/v1/app/version", nil)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	var v struct {
-		Version string `json:"version"`
-	}
-	json.NewDecoder(resp.Body).Decode(&v)
-	return v.Version, nil
+	return h.invoke.GetVersion(ctx)
 }
 
 func (h *Handler) getQueueStatus(ctx context.Context) (*QueueStatus, error) {
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, h.cfg.InvokeURL+"/api/v1/queue/default/status", nil)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
 	var s struct {
 		Queue QueueStatus `json:"queue"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&s); err != nil {
+	if err := h.invoke.GetJSON(ctx, "/api/v1/queue/default/status", &s); err != nil {
 		return nil, err
 	}
 	return &s.Queue, nil

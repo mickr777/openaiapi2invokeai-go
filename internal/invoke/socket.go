@@ -29,7 +29,11 @@ func (c *Client) waitViaSocketIO(ctx context.Context, batchID string, itemID int
 
 	c.log.Debug("socket.io connecting", "url", wsURL)
 
-	conn, _, err := websocket.DefaultDialer.DialContext(ctx, wsURL, nil)
+	headers, err := c.authorizationHeader(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("websocket auth: %w", err)
+	}
+	conn, _, err := websocket.DefaultDialer.DialContext(ctx, wsURL, headers)
 	if err != nil {
 		return nil, fmt.Errorf("websocket dial: %w", err)
 	}
