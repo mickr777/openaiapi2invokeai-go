@@ -154,7 +154,7 @@ func (s *Server) handleImageGenerations(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		imgData, err := s.generateImage(r.Context(), graph)
+		imgData, err := s.generateImage(r.Context(), graph, entry.OutputNodeFor("generation"))
 		if err != nil {
 			s.writeError(w, http.StatusInternalServerError, "server_error", "generation failed: "+err.Error())
 			return
@@ -174,7 +174,7 @@ func (s *Server) handleImageGenerations(w http.ResponseWriter, r *http.Request) 
 }
 
 // generateImage enqueues a graph, waits for completion, and returns image bytes.
-func (s *Server) generateImage(ctx context.Context, graph map[string]any) ([]byte, error) {
+func (s *Server) generateImage(ctx context.Context, graph map[string]any, outputNode string) ([]byte, error) {
 	resp, err := s.invoke.EnqueueBatch(ctx, invoke.Graph(graph))
 	if err != nil {
 		return nil, fmt.Errorf("enqueue: %w", err)
@@ -204,7 +204,7 @@ func (s *Server) generateImage(ctx context.Context, graph map[string]any) ([]byt
 		return nil, fmt.Errorf("get results: %w", err)
 	}
 
-	resultNode, imageName, err := invoke.SelectImageResult(detail, invoke.Graph(graph))
+	resultNode, imageName, err := invoke.SelectImageResult(detail, invoke.Graph(graph), outputNode)
 	if err != nil {
 		return nil, fmt.Errorf("select final image: %w", err)
 	}
