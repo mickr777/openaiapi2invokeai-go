@@ -61,25 +61,30 @@ func (m FieldMapping) IsZero() bool {
 	return m == (FieldMapping{})
 }
 
+func mergeMapping(base, override FieldMapping) FieldMapping {
+	if override.Prompt != "" { base.Prompt = override.Prompt }
+	if override.Negative != "" { base.Negative = override.Negative }
+	if override.Width != "" { base.Width = override.Width }
+	if override.Height != "" { base.Height = override.Height }
+	if override.Seed != "" { base.Seed = override.Seed }
+	if override.Steps != "" { base.Steps = override.Steps }
+	if override.CFG != "" { base.CFG = override.CFG }
+	if override.Image != "" { base.Image = override.Image }
+	if override.Mask != "" { base.Mask = override.Mask }
+	if override.Denoise != "" { base.Denoise = override.Denoise }
+	return base
+}
+
 func (m ModelEntry) MappingFor(role string) FieldMapping {
+	generation := mergeMapping(m.Mapping, m.GenerationMapping)
 	switch role {
 	case "edit":
-		if !m.EditMapping.IsZero() {
-			return m.EditMapping
-		}
+		return mergeMapping(generation, m.EditMapping)
 	case "variant":
-		if !m.VariantMapping.IsZero() {
-			return m.VariantMapping
-		}
-		if !m.EditMapping.IsZero() {
-			return m.EditMapping
-		}
+		return mergeMapping(mergeMapping(generation, m.EditMapping), m.VariantMapping)
 	default:
-		if !m.GenerationMapping.IsZero() {
-			return m.GenerationMapping
-		}
+		return generation
 	}
-	return m.Mapping
 }
 
 func (m ModelEntry) OutputNodeFor(role string) string {
