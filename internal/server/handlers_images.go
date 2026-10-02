@@ -63,14 +63,14 @@ func (s *Server) handleImageEdits(w http.ResponseWriter, r *http.Request) {
 		workflowFile = entry.Workflow
 	}
 
-	width, height, err := workflow.ResolveSize(entry, size)
+	// For edits, auto/omitted size first honors explicit prompt dimensions or
+	// orientation hints, then falls back to the source image dimensions.
+	width, height, err := workflow.ResolveGenerationSize(entry, size, prompt)
 	if err != nil {
 		s.writeError(w, http.StatusBadRequest, "invalid_request_error", err.Error())
 		return
 	}
 
-	// Without an explicit size the graph has to follow the image, not the other
-	// way round, or denoising fails on a tensor mismatch.
 	if width == 0 || height == 0 {
 		width, height, err = imageDimensions(imageData)
 		if err != nil {
