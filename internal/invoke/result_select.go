@@ -13,7 +13,7 @@ type imageCandidate struct {
 
 // SelectImageResult deterministically chooses the final image from a completed
 // InvokeAI queue item. Result map iteration order is deliberately ignored.
-func SelectImageResult(detail *QueueItemDetail, graph Graph) (string, string, error) {
+func SelectImageResult(detail *QueueItemDetail, graph Graph, preferredSourceID ...string) (string, string, error) {
 	if detail == nil {
 		return "", "", fmt.Errorf("nil queue item detail")
 	}
@@ -27,6 +27,36 @@ func SelectImageResult(detail *QueueItemDetail, graph Graph) (string, string, er
 	if len(images) == 0 {
 		return "", "", fmt.Errorf("no images in output")
 	}
+
+	preferred := ""
+	if len(preferredSourceID) > 0 {
+		preferred = preferredSourceID[0]
+	}
+	if preferred != "" {
+		var matches []imageCandidate
+		for execID, name := range images {
+			sourceID := detail.Session.PreparedSourceMapping[execID]
+			if execID == preferred || sourceID == preferred {
+				matches = append(matches, imageCandidate{execID: execID, image: name, sourceID: sourceID})
+			}
+		}
+		if len(matches) == 1 {
+			return matches[0].execID, matches[0].image, nil
+		}
+		if len(matches) > 1 {
+			return "", "", ambiguousImageError(matches, "configured output node produced multiple image results")
+		}
+		if graphNode(graph, preferred) == nil {
+			return "", "", fmt.Errorf("configured output node %q does not exist in submitted workflow", preferred)
+		}
+		if len(images) == 1 && explicitlyNonIntermediate(graphNode(graph, preferred)) {
+			for execID, name := range images {
+				return execID, name, nil
+			}
+		}
+		return "", "", fmt.Errorf("configured output node %q produced no identifiable image result", preferred)
+	}
+
 	if len(images) == 1 {
 		for execID, name := range images {
 			return execID, name, nil
