@@ -116,7 +116,9 @@
     <td class="mono" style="font-size:0.75rem">{{.Mapping.Prompt}}</td>
     <td style="font-size:0.75rem">
       generations
-      {{if .Mapping.Image}}<br>edits &middot; variations{{else}}<br><span style="color:var(--text-muted)">no image mapping</span>{{end}}
+      {{if .SupportsEdit}}<br>edits{{end}}
+      {{if .SupportsVariation}}<br>variations{{end}}
+      {{if and (not .SupportsEdit) (not .SupportsVariation)}}<br><span style="color:var(--text-muted)">no image endpoint mapping</span>{{end}}
     </td>
     <td>
       <button hx-get="/admin/models/edit/{{.ID}}" hx-target="#model-form" hx-swap="innerHTML" class="btn btn-sm">Edit</button>

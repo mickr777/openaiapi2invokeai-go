@@ -128,6 +128,15 @@ func (m ModelEntry) OutputNodeFor(role string) string {
 	return ""
 }
 
+func (m ModelEntry) SupportsEdit() bool {
+	return m.EditWorkflow != "" && m.MappingFor("edit").Image != ""
+}
+
+func (m ModelEntry) SupportsVariation() bool {
+	return m.VariantWorkflow != "" && m.MappingFor("variant").Image != ""
+}
+
+
 // NewRegistry loads or creates the registry at the given data directory.
 func NewRegistry(dataDir string) (*Registry, error) {
 	fp := filepath.Join(dataDir, "registry.json")
