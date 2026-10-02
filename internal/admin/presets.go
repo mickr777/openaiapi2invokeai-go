@@ -33,11 +33,11 @@ var Presets = []Preset{
 	{
 		ID:           "sdxl",
 		Label:        "SDXL (1024x1024)",
-		WorkflowFile: "sdxl-txt2img.json",
+		WorkflowFile: "sdxl-text-to-image.json",
 		WorkflowJSON: sdxlWorkflowJSON,
 		Entry: workflow.ModelEntry{
 			ID:       "sdxl",
-			Workflow: "sdxl-txt2img.json",
+			Workflow: "sdxl-text-to-image.json",
 			Mapping: workflow.FieldMapping{
 				Prompt:   "nodes.positive_prompt.prompt",
 				Negative: "nodes.negative_prompt.prompt",
@@ -54,11 +54,11 @@ var Presets = []Preset{
 	{
 		ID:           "flux",
 		Label:        "Flux (1024x1024)",
-		WorkflowFile: "flux-txt2img.json",
+		WorkflowFile: "flux-text-to-image.json",
 		WorkflowJSON: fluxWorkflowJSON,
 		Entry: workflow.ModelEntry{
 			ID:       "flux",
-			Workflow: "flux-txt2img.json",
+			Workflow: "flux-text-to-image.json",
 			Mapping: workflow.FieldMapping{
 				Prompt: "nodes.text_encoder.prompt",
 				Seed:   "nodes.denoise.seed",
@@ -73,11 +73,11 @@ var Presets = []Preset{
 	{
 		ID:           "zimage",
 		Label:        "Z-Image (1024x1024)",
-		WorkflowFile: "zimage-txt2img.json",
+		WorkflowFile: "z-image-text-to-image.json",
 		WorkflowJSON: zimageWorkflowJSON,
 		Entry: workflow.ModelEntry{
 			ID:       "zimage",
-			Workflow: "zimage-txt2img.json",
+			Workflow: "z-image-text-to-image.json",
 			Mapping: workflow.FieldMapping{
 				Prompt: "nodes.text_encoder.prompt",
 				Seed:   "nodes.denoise.seed",
@@ -91,12 +91,12 @@ var Presets = []Preset{
 	},
 	{
 		ID:           "flux2klein",
-		Label:        "Flux2 Klein (1024x1024)",
-		WorkflowFile: "flux2klein-txt2img.json",
+		Label:        "FLUX.2 Klein (1024x1024)",
+		WorkflowFile: "flux2-klein-text-to-image.json",
 		WorkflowJSON: flux2kleinWorkflowJSON,
 		Entry: workflow.ModelEntry{
 			ID:       "flux2klein",
-			Workflow: "flux2klein-txt2img.json",
+			Workflow: "flux2-klein-text-to-image.json",
 			Mapping: workflow.FieldMapping{
 				Prompt: "nodes.text_encoder.prompt",
 				Seed:   "nodes.denoise.seed",
@@ -111,11 +111,11 @@ var Presets = []Preset{
 	{
 		ID:           "sd15",
 		Label:        "SD 1.5 (512x512)",
-		WorkflowFile: "sd15-txt2img.json",
+		WorkflowFile: "sd15-text-to-image.json",
 		WorkflowJSON: sd15WorkflowJSON,
 		Entry: workflow.ModelEntry{
 			ID:       "sd15",
-			Workflow: "sd15-txt2img.json",
+			Workflow: "sd15-text-to-image.json",
 			Mapping: workflow.FieldMapping{
 				Prompt:   "nodes.positive_prompt.prompt",
 				Negative: "nodes.negative_prompt.prompt",
@@ -131,10 +131,10 @@ var Presets = []Preset{
 	},
 	{
 		ID:               "krea2",
-		Label:            "Krea-2 (1024x1024, txt2img + img2img)",
-		WorkflowFile:     "krea2-txt2img.json",
+		Label:            "Krea 2 (1024x1024, text-to-image + image edit)",
+		WorkflowFile:     "krea2-text-to-image.json",
 		WorkflowJSON:     krea2WorkflowJSON,
-		EditWorkflowFile: "krea2-img2img.json",
+		EditWorkflowFile: "krea2-image-edit.json",
 		EditWorkflowJSON: krea2ImgWorkflowJSON,
 		SubModels: []SubModel{
 			{Field: "qwen3_vl_encoder_model", ModelType: "qwen3_vl_encoder", Base: "any",
@@ -144,9 +144,9 @@ var Presets = []Preset{
 		},
 		Entry: workflow.ModelEntry{
 			ID:              "krea2",
-			Workflow:        "krea2-txt2img.json",
-			EditWorkflow:    "krea2-img2img.json",
-			VariantWorkflow: "krea2-img2img.json",
+			Workflow:        "krea2-text-to-image.json",
+			EditWorkflow:    "krea2-image-edit.json",
+			VariantWorkflow: "krea2-image-edit.json",
 			Mapping: workflow.FieldMapping{
 				Prompt:  "nodes.text_encoder.prompt",
 				Seed:    "nodes.denoise.seed",
@@ -163,10 +163,10 @@ var Presets = []Preset{
 	},
 	{
 		ID:               "anima",
-		Label:            "Anima (1024x1024, txt2img + img2img)",
-		WorkflowFile:     "anima-txt2img.json",
+		Label:            "Anima (1024x1024, text-to-image + image edit)",
+		WorkflowFile:     "anima-text-to-image.json",
 		WorkflowJSON:     animaWorkflowJSON,
-		EditWorkflowFile: "anima-img2img.json",
+		EditWorkflowFile: "anima-image-edit.json",
 		EditWorkflowJSON: animaImgWorkflowJSON,
 		SubModels: []SubModel{
 			{Field: "qwen3_encoder_model", ModelType: "qwen3_encoder", Base: "any",
@@ -175,9 +175,9 @@ var Presets = []Preset{
 		},
 		Entry: workflow.ModelEntry{
 			ID:              "anima",
-			Workflow:        "anima-txt2img.json",
-			EditWorkflow:    "anima-img2img.json",
-			VariantWorkflow: "anima-img2img.json",
+			Workflow:        "anima-text-to-image.json",
+			EditWorkflow:    "anima-image-edit.json",
+			VariantWorkflow: "anima-image-edit.json",
 			Mapping: workflow.FieldMapping{
 				Prompt:  "nodes.text_encoder.prompt",
 				Seed:    "nodes.denoise.seed",
@@ -194,10 +194,10 @@ var Presets = []Preset{
 	},
 	{
 		ID:               "qwenimage",
-		Label:            "Qwen Image (1024x1024, txt2img + img2img)",
-		WorkflowFile:     "qwenimage-txt2img.json",
+		Label:            "Qwen Image (1024x1024, text-to-image + image edit)",
+		WorkflowFile:     "qwen-image-text-to-image.json",
 		WorkflowJSON:     qwenImageWorkflowJSON,
-		EditWorkflowFile: "qwenimage-img2img.json",
+		EditWorkflowFile: "qwen-image-image-edit.json",
 		EditWorkflowJSON: qwenImageImgWorkflowJSON,
 		SubModels: []SubModel{
 			{Field: "qwen_vl_encoder_model", ModelType: "qwen_vl_encoder", Base: "any",
@@ -206,9 +206,9 @@ var Presets = []Preset{
 		},
 		Entry: workflow.ModelEntry{
 			ID:              "qwenimage",
-			Workflow:        "qwenimage-txt2img.json",
-			EditWorkflow:    "qwenimage-img2img.json",
-			VariantWorkflow: "qwenimage-img2img.json",
+			Workflow:        "qwen-image-text-to-image.json",
+			EditWorkflow:    "qwen-image-image-edit.json",
+			VariantWorkflow: "qwen-image-image-edit.json",
 			Mapping: workflow.FieldMapping{
 				Prompt:  "nodes.text_encoder.prompt",
 				Seed:    "nodes.denoise.seed",
