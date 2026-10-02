@@ -24,6 +24,16 @@ func TestInferPromptSize(t *testing.T) {
 	}
 }
 
+func TestResolveGenerationSizeOmittedUsesPromptHint(t *testing.T) {
+	w, h, err := ResolveGenerationSize(ModelEntry{}, "", "make it portrait")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if w != 768 || h != 1360 {
+		t.Fatalf("got %dx%d", w, h)
+	}
+}
+
 func TestResolveGenerationSizeFixedSizeWins(t *testing.T) {
 	w, h, err := ResolveGenerationSize(ModelEntry{}, "1024x1024", "make it portrait")
 	if err != nil {
