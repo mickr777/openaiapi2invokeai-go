@@ -272,23 +272,31 @@ func (h *Handler) modelEdit(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) modelSave(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
+	generationMapping := workflow.FieldMapping{
+		Prompt: r.FormValue("map_prompt"), Negative: r.FormValue("map_negative"),
+		Width: r.FormValue("map_width"), Height: r.FormValue("map_height"),
+		Seed: r.FormValue("map_seed"), Steps: r.FormValue("map_steps"),
+		CFG: r.FormValue("map_cfg"), Image: r.FormValue("map_image"),
+		Mask: r.FormValue("map_mask"), Denoise: r.FormValue("map_denoise"),
+	}
+	editMapping := workflow.FieldMapping{
+		Prompt: r.FormValue("edit_map_prompt"), Negative: r.FormValue("edit_map_negative"),
+		Width: r.FormValue("edit_map_width"), Height: r.FormValue("edit_map_height"),
+		Seed: r.FormValue("edit_map_seed"), Steps: r.FormValue("edit_map_steps"),
+		CFG: r.FormValue("edit_map_cfg"), Image: r.FormValue("edit_map_image"),
+		Mask: r.FormValue("edit_map_mask"), Denoise: r.FormValue("edit_map_denoise"),
+	}
 	entry := workflow.ModelEntry{
-		ID:              r.FormValue("id"),
-		Workflow:        r.FormValue("workflow"),
-		EditWorkflow:    r.FormValue("edit_workflow"),
+		ID: r.FormValue("id"),
+		Workflow: r.FormValue("workflow"),
+		EditWorkflow: r.FormValue("edit_workflow"),
 		VariantWorkflow: r.FormValue("variant_workflow"),
-		Mapping: workflow.FieldMapping{
-			Prompt:   r.FormValue("map_prompt"),
-			Negative: r.FormValue("map_negative"),
-			Width:    r.FormValue("map_width"),
-			Height:   r.FormValue("map_height"),
-			Seed:     r.FormValue("map_seed"),
-			Steps:    r.FormValue("map_steps"),
-			CFG:      r.FormValue("map_cfg"),
-			Image:    r.FormValue("map_image"),
-			Mask:     r.FormValue("map_mask"),
-			Denoise:  r.FormValue("map_denoise"),
-		},
+		OutputNode: r.FormValue("output_node"),
+		EditOutputNode: r.FormValue("edit_output_node"),
+		VariantOutputNode: r.FormValue("variant_output_node"),
+		Mapping: generationMapping,
+		GenerationMapping: generationMapping,
+		EditMapping: editMapping,
 	}
 
 	// Parse size presets
@@ -394,7 +402,7 @@ func (h *Handler) testGenerate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, imageName, err := invoke.SelectImageResult(detail, invoke.Graph(graph))
+	_, imageName, err := invoke.SelectImageResult(detail, invoke.Graph(graph), entry.OutputNodeFor("generation"))
 	if err != nil {
 		h.renderFragment(w, "test-result", "test.html", map[string]any{"Error": "select final image: " + err.Error()})
 		return
