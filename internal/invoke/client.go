@@ -248,6 +248,9 @@ func majorVersion(version string) string {
 }
 
 func (c *Client) EnqueueBatch(ctx context.Context, graph Graph) (*EnqueueBatchResponse, error) {
+	if _, err := c.VerifyVersion(ctx); err != nil {
+		return nil, fmt.Errorf("InvokeAI version check: %w", err)
+	}
 	reqBody := EnqueueBatchRequest{Batch: Batch{Graph: graph, Runs: 1}}
 	body, err := json.Marshal(reqBody)
 	if err != nil {
@@ -273,6 +276,9 @@ func (c *Client) EnqueueBatch(ctx context.Context, graph Graph) (*EnqueueBatchRe
 }
 
 func (c *Client) UploadImage(ctx context.Context, data []byte, filename string, width, height int) (string, error) {
+	if _, err := c.VerifyVersion(ctx); err != nil {
+		return "", fmt.Errorf("InvokeAI version check: %w", err)
+	}
 	var body bytes.Buffer
 	mw := multipart.NewWriter(&body)
 	h := make(textproto.MIMEHeader)
