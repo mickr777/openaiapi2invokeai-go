@@ -12,9 +12,9 @@ ARG BUILD_DATE=unknown
 RUN CGO_ENABLED=0 GOOS=linux go build \
     -trimpath \
     -ldflags "-s -w \
-      -X github.com/Pfannkuchensack/openaiapi2invokeai-go/internal/version.Version=\${VERSION} \
-      -X github.com/Pfannkuchensack/openaiapi2invokeai-go/internal/version.Commit=\${COMMIT} \
-      -X github.com/Pfannkuchensack/openaiapi2invokeai-go/internal/version.Date=\${BUILD_DATE}" \
+      -X github.com/Pfannkuchensack/openaiapi2invokeai-go/internal/version.Version=${VERSION} \
+      -X github.com/Pfannkuchensack/openaiapi2invokeai-go/internal/version.Commit=${COMMIT} \
+      -X github.com/Pfannkuchensack/openaiapi2invokeai-go/internal/version.Date=${BUILD_DATE}" \
     -o /out/invoke-openai-proxy ./cmd/proxy
 
 FROM alpine:3.22
