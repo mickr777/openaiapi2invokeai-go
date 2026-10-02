@@ -48,7 +48,7 @@ var Presets = []Preset{
 				CFG:      "nodes.denoise.cfg_scale",
 			},
 			Defaults:    map[string]any{"steps": 20, "cfg": 7.5},
-			SizePresets: map[string]workflow.Size{"1024x1024": {1024, 1024}, "1792x1024": {1792, 1024}, "1024x1792": {1024, 1792}},
+			SizePresets: map[string]workflow.Size{"1024x1024": {Width: 1024, Height: 1024}, "1792x1024": {Width: 1792, Height: 1024}, "1024x1792": {Width: 1024, Height: 1792}},
 		},
 	},
 	{
@@ -67,7 +67,7 @@ var Presets = []Preset{
 				Steps:  "nodes.denoise.num_steps",
 			},
 			Defaults:    map[string]any{"steps": 20},
-			SizePresets: map[string]workflow.Size{"1024x1024": {1024, 1024}, "1360x768": {1360, 768}, "768x1360": {768, 1360}},
+			SizePresets: map[string]workflow.Size{"1024x1024": {Width: 1024, Height: 1024}, "1360x768": {Width: 1360, Height: 768}, "768x1360": {Width: 768, Height: 1360}},
 		},
 	},
 	{
@@ -86,7 +86,7 @@ var Presets = []Preset{
 				Steps:  "nodes.denoise.steps",
 			},
 			Defaults:    map[string]any{"steps": 8},
-			SizePresets: map[string]workflow.Size{"1024x1024": {1024, 1024}, "1360x768": {1360, 768}, "768x1360": {768, 1360}},
+			SizePresets: map[string]workflow.Size{"1024x1024": {Width: 1024, Height: 1024}, "1360x768": {Width: 1360, Height: 768}, "768x1360": {Width: 768, Height: 1360}},
 		},
 	},
 	{
@@ -105,7 +105,7 @@ var Presets = []Preset{
 				Steps:  "nodes.denoise.num_steps",
 			},
 			Defaults:    map[string]any{"steps": 4},
-			SizePresets: map[string]workflow.Size{"1024x1024": {1024, 1024}, "1360x768": {1360, 768}, "768x1360": {768, 1360}},
+			SizePresets: map[string]workflow.Size{"1024x1024": {Width: 1024, Height: 1024}, "1360x768": {Width: 1360, Height: 768}, "768x1360": {Width: 768, Height: 1360}},
 		},
 	},
 	{
@@ -126,7 +126,7 @@ var Presets = []Preset{
 				CFG:      "nodes.denoise.cfg_scale",
 			},
 			Defaults:    map[string]any{"steps": 20, "cfg": 7.5},
-			SizePresets: map[string]workflow.Size{"512x512": {512, 512}, "768x512": {768, 512}, "512x768": {512, 768}},
+			SizePresets: map[string]workflow.Size{"512x512": {Width: 512, Height: 512}, "768x512": {Width: 768, Height: 512}, "512x768": {Width: 512, Height: 768}},
 		},
 	},
 	{
@@ -158,7 +158,7 @@ var Presets = []Preset{
 				Denoise: "nodes.denoise.denoising_start",
 			},
 			Defaults:    map[string]any{"steps": 8},
-			SizePresets: map[string]workflow.Size{"1024x1024": {1024, 1024}, "1360x768": {1360, 768}, "768x1360": {768, 1360}},
+			SizePresets: map[string]workflow.Size{"1024x1024": {Width: 1024, Height: 1024}, "1360x768": {Width: 1360, Height: 768}, "768x1360": {Width: 768, Height: 1360}},
 		},
 	},
 	{
@@ -189,7 +189,7 @@ var Presets = []Preset{
 				Denoise: "nodes.denoise.denoising_start",
 			},
 			Defaults:    map[string]any{"steps": 20, "cfg": 4.5},
-			SizePresets: map[string]workflow.Size{"1024x1024": {1024, 1024}, "1360x768": {1360, 768}, "768x1360": {768, 1360}},
+			SizePresets: map[string]workflow.Size{"1024x1024": {Width: 1024, Height: 1024}, "1360x768": {Width: 1360, Height: 768}, "768x1360": {Width: 768, Height: 1360}},
 		},
 	},
 	{
@@ -220,7 +220,7 @@ var Presets = []Preset{
 				Denoise: "nodes.denoise.denoising_start",
 			},
 			Defaults:    map[string]any{"steps": 20, "cfg": 4.0},
-			SizePresets: map[string]workflow.Size{"1024x1024": {1024, 1024}, "1360x768": {1360, 768}, "768x1360": {768, 1360}},
+			SizePresets: map[string]workflow.Size{"1024x1024": {Width: 1024, Height: 1024}, "1360x768": {Width: 1360, Height: 768}, "768x1360": {Width: 768, Height: 1360}},
 		},
 	},
 }
