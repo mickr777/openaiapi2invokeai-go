@@ -59,6 +59,10 @@ All options available as CLI flags, environment variables, or `config.toml`:
 | `--listen-ip` | `PROXY_LISTEN_IP` | `127.0.0.1` | Bind address |
 | `--port` | `PROXY_PORT` | `8080` | Listen port |
 | `--invoke-url` | `INVOKE_URL` | `http://127.0.0.1:9090` | InvokeAI base URL |
+| `--invoke-version` | `INVOKE_VERSION` | `auto` | InvokeAI compatibility mode: `auto`, `6`, or `7` |
+| `--invoke-auth-mode` | `INVOKE_AUTH_MODE` | `none` | InvokeAI auth mode: `none` or `password` |
+| `--invoke-email` | `INVOKE_EMAIL` | _(empty)_ | InvokeAI account email for password auth |
+| `--invoke-password` | `INVOKE_PASSWORD` | _(empty)_ | InvokeAI account password for password auth |
 | `--data-dir` | `PROXY_DATA_DIR` | `~/.invoke-openai-proxy` | Storage for workflows + registry |
 | `--api-key` | `PROXY_API_KEY` | _(empty)_ | Bearer token for API auth |
 | `--admin-user` | `PROXY_ADMIN_USER` | _(empty)_ | Basic-auth user for `/admin` |
@@ -69,6 +73,8 @@ All options available as CLI flags, environment variables, or `config.toml`:
 Priority: flag > environment > config file > default.
 
 Config file location: `<data-dir>/config.toml`
+
+For InvokeAI multi-user mode, set `invoke_auth_mode = "password"` plus `invoke_email` and `invoke_password` (or the matching environment variables). The proxy logs in through `/api/v1/auth/login`, attaches the returned Bearer token to protected InvokeAI requests, and retries once after a 401. Keep `config.toml` private if it contains credentials.
 
 ## API Endpoints
 

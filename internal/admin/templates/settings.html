@@ -7,6 +7,10 @@
     <tr><td>listen-ip</td><td class="mono">{{.Config.ListenIP}}</td></tr>
     <tr><td>port</td><td class="mono">{{.Config.Port}}</td></tr>
     <tr><td>invoke-url</td><td class="mono">{{.Config.InvokeURL}}</td></tr>
+    <tr><td>invoke-version</td><td class="mono">{{.Config.InvokeVersion}}</td></tr>
+    <tr><td>invoke-auth-mode</td><td class="mono">{{.Config.InvokeAuthMode}}</td></tr>
+    <tr><td>invoke-email</td><td class="mono">{{if .Config.InvokeEmail}}{{.Config.InvokeEmail}}{{else}}(not set){{end}}</td></tr>
+    <tr><td>invoke-password</td><td class="mono">{{if .Config.InvokePassword}}(set){{else}}(not set){{end}}</td></tr>
     <tr><td>data-dir</td><td class="mono">{{.Config.DataDir}}</td></tr>
     <tr><td>api-key</td><td class="mono">{{if .Config.APIKey}}(set){{else}}(not set){{end}}</td></tr>
     <tr><td>admin-user</td><td class="mono">{{if .Config.AdminUser}}{{.Config.AdminUser}}{{else}}(not set — open access){{end}}</td></tr>

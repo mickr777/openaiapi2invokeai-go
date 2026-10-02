@@ -101,6 +101,11 @@ func (s *Server) handleImageGenerations(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	if _, err := s.invoke.VerifyVersion(r.Context()); err != nil {
+		s.writeError(w, http.StatusBadGateway, "server_error", "InvokeAI compatibility check failed: "+err.Error())
+		return
+	}
+
 	// Look up model in registry
 	modelID := req.Model
 	if modelID == "" {

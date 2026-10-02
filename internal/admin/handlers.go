@@ -554,21 +554,13 @@ func (h *Handler) getInvokeModels(ctx context.Context) []InvokeModel {
 }
 
 func (h *Handler) fetchInvokeModels(ctx context.Context, modelType string) []InvokeModel {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, h.cfg.InvokeURL+"/api/v2/models/", nil)
-	if err != nil {
-		return nil
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil
-	}
-	defer resp.Body.Close()
-
 	var result struct {
 		Models []InvokeModel `json:"models"`
 	}
-	json.NewDecoder(resp.Body).Decode(&result)
+	if err := h.invoke.GetJSON(ctx, "/api/v2/models/", &result); err != nil {
+		h.log.Warn("fetch InvokeAI models", "error", err)
+		return nil
+	}
 
 	if modelType == "" {
 		return result.Models
@@ -774,30 +766,14 @@ func (h *Handler) listWorkflows() []WorkflowInfo {
 }
 
 func (h *Handler) getInvokeVersion(ctx context.Context) (string, error) {
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, h.cfg.InvokeURL+"/api/v1/app/version", nil)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	var v struct {
-		Version string `json:"version"`
-	}
-	json.NewDecoder(resp.Body).Decode(&v)
-	return v.Version, nil
+	return h.invoke.GetVersion(ctx)
 }
 
 func (h *Handler) getQueueStatus(ctx context.Context) (*QueueStatus, error) {
-	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, h.cfg.InvokeURL+"/api/v1/queue/default/status", nil)
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
 	var s struct {
 		Queue QueueStatus `json:"queue"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&s); err != nil {
+	if err := h.invoke.GetJSON(ctx, "/api/v1/queue/default/status", &s); err != nil {
 		return nil, err
 	}
 	return &s.Queue, nil

@@ -45,6 +45,11 @@ func (s *Server) handleImageEdits(w http.ResponseWriter, r *http.Request) {
 	// Read mask (optional)
 	maskData, _ := readFormFile(r, "mask")
 
+	if _, err := s.invoke.VerifyVersion(r.Context()); err != nil {
+		s.writeError(w, http.StatusBadGateway, "server_error", "InvokeAI compatibility check failed: "+err.Error())
+		return
+	}
+
 	// Resolve model
 	entry, ok := s.resolveModel(modelID)
 	if !ok {
@@ -149,6 +154,11 @@ func (s *Server) handleImageVariations(w http.ResponseWriter, r *http.Request) {
 	imageData, err := readFormFile(r, "image")
 	if err != nil {
 		s.writeError(w, http.StatusBadRequest, "invalid_request_error", "image is required: "+err.Error())
+		return
+	}
+
+	if _, err := s.invoke.VerifyVersion(r.Context()); err != nil {
+		s.writeError(w, http.StatusBadGateway, "server_error", "InvokeAI compatibility check failed: "+err.Error())
 		return
 	}
 
