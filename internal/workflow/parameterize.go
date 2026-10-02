@@ -22,47 +22,59 @@ type Params struct {
 // BuildGraph loads a workflow file and applies parameter substitution based on
 // the model entry's field mapping. Returns the ready-to-enqueue graph.
 func BuildGraph(dataDir string, entry ModelEntry, params Params) (map[string]any, error) {
-	parsed, err := LoadWorkflow(dataDir, entry.Workflow)
+	return buildGraph(dataDir, entry.Workflow, entry, params, entry.MappingFor("generation"))
+}
+
+// BuildGraphFromFile preserves the historical behavior of using the legacy
+// mapping field. New endpoint-specific callers should use BuildGraphForRole.
+func BuildGraphFromFile(dataDir string, workflowFile string, entry ModelEntry, params Params) (map[string]any, error) {
+	return buildGraph(dataDir, workflowFile, entry, params, entry.Mapping)
+}
+
+func BuildGraphForRole(dataDir string, workflowFile string, entry ModelEntry, params Params, role string) (map[string]any, error) {
+	return buildGraph(dataDir, workflowFile, entry, params, entry.MappingFor(role))
+}
+
+func buildGraph(dataDir, workflowFile string, entry ModelEntry, params Params, mapping FieldMapping) (map[string]any, error) {
+	parsed, err := LoadWorkflow(dataDir, workflowFile)
 	if err != nil {
 		return nil, err
 	}
 	graph := parsed.Graph
 
-	// Apply defaults first, then explicit params override
 	if entry.Defaults != nil {
 		for key, val := range entry.Defaults {
-			path := mappingPathForKey(entry.Mapping, key)
+			path := mappingPathForKey(mapping, key)
 			if path != "" {
 				setField(graph, path, val)
 			}
 		}
 	}
 
-	// Apply explicit parameters
-	if params.Prompt != "" && entry.Mapping.Prompt != "" {
-		setField(graph, entry.Mapping.Prompt, params.Prompt)
+	if params.Prompt != "" && mapping.Prompt != "" {
+		setField(graph, mapping.Prompt, params.Prompt)
 	}
-	if params.Negative != "" && entry.Mapping.Negative != "" {
-		setField(graph, entry.Mapping.Negative, params.Negative)
+	if params.Negative != "" && mapping.Negative != "" {
+		setField(graph, mapping.Negative, params.Negative)
 	}
-	if params.Width > 0 && entry.Mapping.Width != "" {
-		setField(graph, entry.Mapping.Width, params.Width)
+	if params.Width > 0 && mapping.Width != "" {
+		setField(graph, mapping.Width, params.Width)
 	}
-	if params.Height > 0 && entry.Mapping.Height != "" {
-		setField(graph, entry.Mapping.Height, params.Height)
+	if params.Height > 0 && mapping.Height != "" {
+		setField(graph, mapping.Height, params.Height)
 	}
-	if entry.Mapping.Seed != "" {
+	if mapping.Seed != "" {
 		seed := params.Seed
 		if seed <= 0 {
 			seed = rand.Int64N(2147483647)
 		}
-		setField(graph, entry.Mapping.Seed, seed)
+		setField(graph, mapping.Seed, seed)
 	}
-	if params.Steps > 0 && entry.Mapping.Steps != "" {
-		setField(graph, entry.Mapping.Steps, params.Steps)
+	if params.Steps > 0 && mapping.Steps != "" {
+		setField(graph, mapping.Steps, params.Steps)
 	}
-	if params.CFG > 0 && entry.Mapping.CFG != "" {
-		setField(graph, entry.Mapping.CFG, params.CFG)
+	if params.CFG > 0 && mapping.CFG != "" {
+		setField(graph, mapping.CFG, params.CFG)
 	}
 
 	return graph, nil
@@ -121,14 +133,6 @@ func mappingPathForKey(m FieldMapping, key string) string {
 		return m.Negative
 	}
 	return ""
-}
-
-// BuildGraphFromFile is like BuildGraph but allows specifying the workflow file directly
-// (used when edit/variant workflows differ from the default).
-func BuildGraphFromFile(dataDir string, workflowFile string, entry ModelEntry, params Params) (map[string]any, error) {
-	e := entry
-	e.Workflow = workflowFile
-	return BuildGraph(dataDir, e, params)
 }
 
 // SetGraphField sets a value at a dot-path in a graph. Exported for use by handlers.
