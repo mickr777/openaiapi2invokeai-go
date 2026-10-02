@@ -13,7 +13,13 @@ Allows tools like [Open-WebUI](https://github.com/open-webui/open-webui) and any
 - **Model registry** — map OpenAI model names to InvokeAI workflows with parameter injection
 - **Admin UI** — embedded HTMX interface for managing workflows, models, and testing
 - **Single binary** — no dependencies, no database, no CGO
-- **Real-time** — Socket.IO integration for instant completion detection
+- **Real-time** — Socket.IO integration for instant completion detection with polling fallback
+- **InvokeAI v6/v7** — auto-detect or pin the server major version
+- **Multi-user InvokeAI** — optional email/password login, Bearer auth, and one-time 401 re-authentication
+- **Deterministic results** — maps InvokeAI execution IDs back to workflow nodes instead of depending on map iteration order
+- **Prompt-aware auto size** — `size: "auto"` understands explicit dimensions plus portrait, landscape, wide and square hints
+- **Workflow auto-detection** — review-first suggestions for model ID, endpoint role, mappings and final output node
+- **Containers / Unraid** — multi-stage Docker image, GHCR publishing workflow and Unraid template
 
 ## Quickstart
 
@@ -39,16 +45,24 @@ SDXL, Flux, Flux2 Klein, Z-Image, SD 1.5, Krea-2, Anima or Qwen Image against a 
 
 Set **OpenAI API Base URL** to `http://<proxy-host>:8080/v1` and the models from your registry will appear in the image generation dropdown.
 
+If you want Open-WebUI to send `size: "auto"` for non-OpenAI model IDs, add the model IDs to Open-WebUI's `IMAGE_AUTO_SIZE_MODELS_REGEX_PATTERN`, for example:
+
+```text
+^(gpt-image|krea2|flux2klein)
+```
+
+With `auto`, prompts such as `make this 768x1360`, `portrait`, `wide cinematic`, or `square` are translated into workflow width/height values when those fields are mapped.
+
 ## Build from Source
 
 ```bash
-git clone https://github.com/Pfannkuchensack/openaiapi2invokeai-go.git
+git clone https://github.com/mickr777/openaiapi2invokeai-go.git
 cd openaiapi2invokeai-go
 make build        # → bin/invoke-openai-proxy
 make cross        # → linux/amd64, linux/arm64, darwin/arm64, windows/amd64
 ```
 
-Requires Go 1.22+.
+Requires the Go version declared in `go.mod` (currently Go 1.26.x).
 
 ## Configuration
 
@@ -110,6 +124,8 @@ Two JSON shapes are accepted and both are detected automatically on upload:
 
 Either way the field paths used in the model registry refer to the graph form, i.e. `nodes.<node-id>.<field>`.
 
+The **Inspect** page also runs conservative auto-detection. It shows the proposed model ID, generation/edit role, final image node and field mappings before anything is saved. Ambiguous workflows are blocked from one-click configuration rather than guessed.
+
 ## Model Registry
 
 Models are defined in `<data-dir>/registry.json`. Each model maps an ID to a workflow file and defines which graph nodes receive which parameters:
@@ -143,3 +159,21 @@ The admin UI edits this registry directly, so the JSON below is what the table a
 ```
 
 Use the **Admin UI → Workflows → Inspect** page to find the correct node UUIDs and field names.
+
+Generation, edit and variation workflows may use different node IDs. The registry therefore supports endpoint-specific mappings and final output node IDs while retaining the original `mapping` field for compatibility with older registries.
+
+## Docker
+
+Build locally:
+
+```bash
+docker build -t invoke-openai-proxy:unraid .
+docker run --rm -p 8081:8080 \
+  -v /path/to/config:/config \
+  -e INVOKE_URL=http://192.168.1.20:9090 \
+  invoke-openai-proxy:unraid
+```
+
+The container defaults to `PUID=99` and `PGID=100` for Unraid. The included template is at `unraid/invoke-openai-proxy.xml`. Images are configured to publish to `ghcr.io/mickr777/openaiapi2invokeai-go` after changes reach `main`.
+
+See `unraid/README.md` for the Unraid setup.
