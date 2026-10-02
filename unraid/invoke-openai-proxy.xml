@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>invoke-openai-proxy</Name>
+  <Repository>ghcr.io/mickr777/openaiapi2invokeai-go:latest</Repository>
+  <Registry>https://github.com/mickr777/openaiapi2invokeai-go/pkgs/container/openaiapi2invokeai-go</Registry>
+  <Network>bridge</Network>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/mickr777/openaiapi2invokeai-go/issues</Support>
+  <Project>https://github.com/mickr777/openaiapi2invokeai-go</Project>
+  <Overview>OpenAI-compatible image API proxy for InvokeAI with an embedded admin UI. Supports generation, edits, workflow mappings, InvokeAI v6/v7 compatibility and optional multi-user authentication.</Overview>
+  <Category>Tools: Other:</Category>
+  <WebUI>http://[IP]:[PORT:8080]/admin</WebUI>
+  <Icon>https://raw.githubusercontent.com/invoke-ai/InvokeAI/main/docs/assets/invoke-ai-logo.png</Icon>
+  <ExtraParams>--restart unless-stopped</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>Configure INVOKE_URL to the LAN/container address of your InvokeAI instance. Do not use 127.0.0.1 unless InvokeAI runs in the same container.</Requires>
+
+  <Config Name="Web UI / API Port" Target="8080" Default="8081" Mode="tcp" Description="Host port mapped to the proxy's internal port 8080." Type="Port" Display="always" Required="true" Mask="false"/>
+  <Config Name="Appdata" Target="/config" Default="/mnt/user/appdata/invoke-openai-proxy" Mode="rw" Description="Persistent registry, workflows and config.toml." Type="Path" Display="always" Required="true" Mask="false"/>
+  <Config Name="InvokeAI URL" Target="INVOKE_URL" Default="http://192.168.1.10:9090" Mode="" Description="Base URL of the InvokeAI server." Type="Variable" Display="always" Required="true" Mask="false"/>
+  <Config Name="InvokeAI Version" Target="INVOKE_VERSION" Default="auto" Mode="" Description="auto, 6, or 7." Type="Variable" Display="advanced" Required="true" Mask="false"/>
+  <Config Name="InvokeAI Auth Mode" Target="INVOKE_AUTH_MODE" Default="none" Mode="" Description="none or password." Type="Variable" Display="advanced" Required="true" Mask="false"/>
+  <Config Name="InvokeAI Email" Target="INVOKE_EMAIL" Default="" Mode="" Description="InvokeAI login email when password auth is enabled." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="InvokeAI Password" Target="INVOKE_PASSWORD" Default="" Mode="" Description="InvokeAI password when password auth is enabled." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="Proxy API Key" Target="PROXY_API_KEY" Default="" Mode="" Description="Optional Bearer token clients must send to the OpenAI-compatible proxy API." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="Admin User" Target="PROXY_ADMIN_USER" Default="" Mode="" Description="Optional Basic Auth username for /admin." Type="Variable" Display="advanced" Required="false" Mask="false"/>
+  <Config Name="Admin Password" Target="PROXY_ADMIN_PASS" Default="" Mode="" Description="Optional Basic Auth password for /admin." Type="Variable" Display="advanced" Required="false" Mask="true"/>
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="Container runtime user ID." Type="Variable" Display="advanced" Required="true" Mask="false"/>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Container runtime group ID." Type="Variable" Display="advanced" Required="true" Mask="false"/>
+</Container>
