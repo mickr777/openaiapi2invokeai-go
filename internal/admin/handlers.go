@@ -394,13 +394,13 @@ func (h *Handler) testGenerate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	names := h.invoke.GetImageNames(detail)
-	if len(names) == 0 {
-		h.renderFragment(w, "test-result", "test.html", map[string]any{"Error": "no images in output"})
+	_, imageName, err := invoke.SelectImageResult(detail, invoke.Graph(graph))
+	if err != nil {
+		h.renderFragment(w, "test-result", "test.html", map[string]any{"Error": "select final image: " + err.Error()})
 		return
 	}
 
-	imgBytes, _, err := h.invoke.GetImageBytes(r.Context(), names[len(names)-1])
+	imgBytes, _, err := h.invoke.GetImageBytes(r.Context(), imageName)
 	if err != nil {
 		h.renderFragment(w, "test-result", "test.html", map[string]any{"Error": "fetch image: " + err.Error()})
 		return

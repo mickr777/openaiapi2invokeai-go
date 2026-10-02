@@ -199,13 +199,13 @@ func (s *Server) generateImage(ctx context.Context, graph map[string]any) ([]byt
 		return nil, fmt.Errorf("get results: %w", err)
 	}
 
-	names := s.invoke.GetImageNames(detail)
-	if len(names) == 0 {
-		return nil, fmt.Errorf("no images in output")
+	resultNode, imageName, err := invoke.SelectImageResult(detail, invoke.Graph(graph))
+	if err != nil {
+		return nil, fmt.Errorf("select final image: %w", err)
 	}
+	s.log.Debug("selected final image", "result_node", resultNode, "image_name", imageName)
 
-	// Fetch the last image (typically the final output)
-	imgBytes, _, err := s.invoke.GetImageBytes(ctx, names[len(names)-1])
+	imgBytes, _, err := s.invoke.GetImageBytes(ctx, imageName)
 	if err != nil {
 		return nil, fmt.Errorf("fetch image: %w", err)
 	}

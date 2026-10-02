@@ -68,9 +68,11 @@ type QueueItemDetail struct {
 	Origin      string `json:"origin"`
 	Destination string `json:"destination"`
 	Session     struct {
-		ID      string                      `json:"id"`
-		Graph   Graph                       `json:"graph"`
-		Results map[string]InvocationOutput `json:"results"`
+		ID                    string                      `json:"id"`
+		Graph                 Graph                       `json:"graph"`
+		ExecutionGraph        Graph                       `json:"execution_graph"`
+		PreparedSourceMapping map[string]string           `json:"prepared_source_mapping"`
+		Results               map[string]InvocationOutput `json:"results"`
 	} `json:"session"`
 }
 
