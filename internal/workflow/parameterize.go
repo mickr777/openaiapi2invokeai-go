@@ -181,7 +181,8 @@ func ResolveGenerationSize(entry ModelEntry, sizeStr, prompt string) (int, int, 
 	if w > 0 && h > 0 {
 		return w, h, nil
 	}
-	if !strings.EqualFold(strings.TrimSpace(sizeStr), "auto") {
+	trimmedSize := strings.TrimSpace(sizeStr)
+	if trimmedSize != "" && !strings.EqualFold(trimmedSize, "auto") {
 		return w, h, nil
 	}
 	if inferredW, inferredH, ok := InferPromptSize(prompt); ok {
