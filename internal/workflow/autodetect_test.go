@@ -5,10 +5,10 @@ import "testing"
 func TestSuggestGraphGeneration(t *testing.T) {
 	graph := map[string]any{
 		"nodes": map[string]any{
-			"loader": map[string]any{"id": "loader", "type": "krea2_model_loader", "model": map[string]any{"name": "Krea 2 Turbo"}},
-			"text": map[string]any{"id": "text", "type": "krea2_text_encoder", "prompt": ""},
+			"loader":  map[string]any{"id": "loader", "type": "krea2_model_loader", "model": map[string]any{"name": "Krea 2 Turbo"}},
+			"text":    map[string]any{"id": "text", "type": "krea2_text_encoder", "prompt": ""},
 			"denoise": map[string]any{"id": "denoise", "type": "krea2_denoise", "seed": 0, "width": 1360, "height": 768, "steps": 8, "cfg_scale": 1.0},
-			"decode": map[string]any{"id": "decode", "type": "qwen_image_l2i", "is_intermediate": false},
+			"decode":  map[string]any{"id": "decode", "type": "qwen_image_l2i", "is_intermediate": false},
 		},
 		"edges": []any{
 			map[string]any{"source": map[string]any{"node_id": "text"}, "destination": map[string]any{"node_id": "denoise"}},
@@ -30,10 +30,10 @@ func TestSuggestGraphGeneration(t *testing.T) {
 func TestSuggestGraphEditUsesImageInput(t *testing.T) {
 	graph := map[string]any{
 		"nodes": map[string]any{
-			"image": map[string]any{"id": "image", "type": "image", "image": map[string]any{}},
-			"text": map[string]any{"id": "text", "type": "text_encoder", "prompt": ""},
+			"image":   map[string]any{"id": "image", "type": "image", "image": map[string]any{}},
+			"text":    map[string]any{"id": "text", "type": "text_encoder", "prompt": ""},
 			"denoise": map[string]any{"id": "denoise", "type": "flux2_denoise", "seed": 0, "width": 768, "height": 1360, "num_steps": 4, "denoising_start": 0.3},
-			"decode": map[string]any{"id": "decode", "type": "flux2_vae_decode", "is_intermediate": false},
+			"decode":  map[string]any{"id": "decode", "type": "flux2_vae_decode", "is_intermediate": false},
 		},
 		"edges": []any{
 			map[string]any{"source": map[string]any{"node_id": "image"}, "destination": map[string]any{"node_id": "denoise"}},
@@ -51,8 +51,8 @@ func TestSuggestGraphAmbiguousOutputBlocks(t *testing.T) {
 	graph := map[string]any{
 		"nodes": map[string]any{
 			"text": map[string]any{"id": "text", "type": "text_encoder", "prompt": ""},
-			"a": map[string]any{"id": "a", "type": "vae_decode", "is_intermediate": false},
-			"b": map[string]any{"id": "b", "type": "vae_decode", "is_intermediate": false},
+			"a":    map[string]any{"id": "a", "type": "vae_decode", "is_intermediate": false},
+			"b":    map[string]any{"id": "b", "type": "vae_decode", "is_intermediate": false},
 		},
 		"edges": []any{},
 	}

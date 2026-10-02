@@ -36,7 +36,7 @@ var Presets = []Preset{
 		WorkflowFile: "sdxl-text-to-image.json",
 		WorkflowJSON: sdxlWorkflowJSON,
 		Entry: workflow.ModelEntry{
-			ID:       "sdxl",
+			ID:         "sdxl",
 			Workflow:   "sdxl-text-to-image.json",
 			OutputNode: "decode",
 			Mapping: workflow.FieldMapping{
@@ -58,7 +58,7 @@ var Presets = []Preset{
 		WorkflowFile: "flux-text-to-image.json",
 		WorkflowJSON: fluxWorkflowJSON,
 		Entry: workflow.ModelEntry{
-			ID:       "flux",
+			ID:         "flux",
 			Workflow:   "flux-text-to-image.json",
 			OutputNode: "decode",
 			Mapping: workflow.FieldMapping{
@@ -78,7 +78,7 @@ var Presets = []Preset{
 		WorkflowFile: "z-image-text-to-image.json",
 		WorkflowJSON: zimageWorkflowJSON,
 		Entry: workflow.ModelEntry{
-			ID:       "zimage",
+			ID:         "zimage",
 			Workflow:   "z-image-text-to-image.json",
 			OutputNode: "decode",
 			Mapping: workflow.FieldMapping{
@@ -98,7 +98,7 @@ var Presets = []Preset{
 		WorkflowFile: "flux2-klein-text-to-image.json",
 		WorkflowJSON: flux2kleinWorkflowJSON,
 		Entry: workflow.ModelEntry{
-			ID:       "flux2klein",
+			ID:         "flux2klein",
 			Workflow:   "flux2-klein-text-to-image.json",
 			OutputNode: "decode",
 			Mapping: workflow.FieldMapping{
@@ -118,7 +118,7 @@ var Presets = []Preset{
 		WorkflowFile: "sd15-text-to-image.json",
 		WorkflowJSON: sd15WorkflowJSON,
 		Entry: workflow.ModelEntry{
-			ID:       "sd15",
+			ID:         "sd15",
 			Workflow:   "sd15-text-to-image.json",
 			OutputNode: "decode",
 			Mapping: workflow.FieldMapping{
@@ -155,7 +155,7 @@ var Presets = []Preset{
 			OutputNode:        "decode",
 			EditOutputNode:    "decode",
 			VariantOutputNode: "decode",
-			Mapping:           workflow.FieldMapping{
+			Mapping: workflow.FieldMapping{
 				Prompt: "nodes.text_encoder.prompt",
 				Seed:   "nodes.denoise.seed",
 				Width:  "nodes.denoise.width",
@@ -171,7 +171,7 @@ var Presets = []Preset{
 				Steps:  "nodes.denoise.steps",
 				CFG:    "nodes.denoise.cfg_scale",
 			},
-			EditMapping:       workflow.FieldMapping{
+			EditMapping: workflow.FieldMapping{
 				Prompt:  "nodes.text_encoder.prompt",
 				Seed:    "nodes.denoise.seed",
 				Width:   "nodes.denoise.width",
@@ -181,7 +181,7 @@ var Presets = []Preset{
 				Image:   "nodes.i2l.image",
 				Denoise: "nodes.denoise.denoising_start",
 			},
-			VariantMapping:    workflow.FieldMapping{
+			VariantMapping: workflow.FieldMapping{
 				Prompt:  "nodes.text_encoder.prompt",
 				Seed:    "nodes.denoise.seed",
 				Width:   "nodes.denoise.width",
@@ -215,7 +215,7 @@ var Presets = []Preset{
 			OutputNode:        "decode",
 			EditOutputNode:    "decode",
 			VariantOutputNode: "decode",
-			Mapping:           workflow.FieldMapping{
+			Mapping: workflow.FieldMapping{
 				Prompt: "nodes.text_encoder.prompt",
 				Seed:   "nodes.denoise.seed",
 				Width:  "nodes.denoise.width",
@@ -231,7 +231,7 @@ var Presets = []Preset{
 				Steps:  "nodes.denoise.steps",
 				CFG:    "nodes.denoise.guidance_scale",
 			},
-			EditMapping:       workflow.FieldMapping{
+			EditMapping: workflow.FieldMapping{
 				Prompt:  "nodes.text_encoder.prompt",
 				Seed:    "nodes.denoise.seed",
 				Width:   "nodes.denoise.width",
@@ -241,7 +241,7 @@ var Presets = []Preset{
 				Image:   "nodes.i2l.image",
 				Denoise: "nodes.denoise.denoising_start",
 			},
-			VariantMapping:    workflow.FieldMapping{
+			VariantMapping: workflow.FieldMapping{
 				Prompt:  "nodes.text_encoder.prompt",
 				Seed:    "nodes.denoise.seed",
 				Width:   "nodes.denoise.width",
@@ -275,7 +275,7 @@ var Presets = []Preset{
 			OutputNode:        "decode",
 			EditOutputNode:    "decode",
 			VariantOutputNode: "decode",
-			Mapping:           workflow.FieldMapping{
+			Mapping: workflow.FieldMapping{
 				Prompt: "nodes.text_encoder.prompt",
 				Seed:   "nodes.denoise.seed",
 				Width:  "nodes.denoise.width",
@@ -291,7 +291,7 @@ var Presets = []Preset{
 				Steps:  "nodes.denoise.steps",
 				CFG:    "nodes.denoise.cfg_scale",
 			},
-			EditMapping:       workflow.FieldMapping{
+			EditMapping: workflow.FieldMapping{
 				Prompt:  "nodes.text_encoder.prompt",
 				Seed:    "nodes.denoise.seed",
 				Width:   "nodes.denoise.width",
@@ -301,7 +301,7 @@ var Presets = []Preset{
 				Image:   "nodes.i2l.image",
 				Denoise: "nodes.denoise.denoising_start",
 			},
-			VariantMapping:    workflow.FieldMapping{
+			VariantMapping: workflow.FieldMapping{
 				Prompt:  "nodes.text_encoder.prompt",
 				Seed:    "nodes.denoise.seed",
 				Width:   "nodes.denoise.width",

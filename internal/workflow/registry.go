@@ -22,18 +22,18 @@ type RegistryData struct {
 
 // ModelEntry maps an OpenAI model ID to an InvokeAI workflow + parameters.
 type ModelEntry struct {
-	ID                string         `json:"id"`
-	Workflow          string         `json:"workflow"`
-	EditWorkflow      string         `json:"edit_workflow,omitempty"`
-	VariantWorkflow   string         `json:"variant_workflow,omitempty"`
-	OutputNode        string         `json:"output_node,omitempty"`
-	EditOutputNode    string         `json:"edit_output_node,omitempty"`
-	VariantOutputNode string         `json:"variant_output_node,omitempty"`
-	Defaults          map[string]any `json:"defaults,omitempty"`
-	Mapping           FieldMapping   `json:"mapping,omitempty"`
-	GenerationMapping FieldMapping   `json:"generation_mapping,omitempty"`
-	EditMapping       FieldMapping   `json:"edit_mapping,omitempty"`
-	VariantMapping    FieldMapping   `json:"variant_mapping,omitempty"`
+	ID                string          `json:"id"`
+	Workflow          string          `json:"workflow"`
+	EditWorkflow      string          `json:"edit_workflow,omitempty"`
+	VariantWorkflow   string          `json:"variant_workflow,omitempty"`
+	OutputNode        string          `json:"output_node,omitempty"`
+	EditOutputNode    string          `json:"edit_output_node,omitempty"`
+	VariantOutputNode string          `json:"variant_output_node,omitempty"`
+	Defaults          map[string]any  `json:"defaults,omitempty"`
+	Mapping           FieldMapping    `json:"mapping,omitempty"`
+	GenerationMapping FieldMapping    `json:"generation_mapping,omitempty"`
+	EditMapping       FieldMapping    `json:"edit_mapping,omitempty"`
+	VariantMapping    FieldMapping    `json:"variant_mapping,omitempty"`
 	SizePresets       map[string]Size `json:"size_presets,omitempty"`
 }
 
@@ -46,9 +46,9 @@ type FieldMapping struct {
 	Seed     string `json:"seed,omitempty"`
 	Steps    string `json:"steps,omitempty"`
 	CFG      string `json:"cfg,omitempty"`
-	Image    string `json:"image,omitempty"`    // input image (for edits/variations)
-	Mask     string `json:"mask,omitempty"`     // mask image (for edits/inpainting)
-	Denoise  string `json:"denoise,omitempty"`  // denoising strength (for variations)
+	Image    string `json:"image,omitempty"`   // input image (for edits/variations)
+	Mask     string `json:"mask,omitempty"`    // mask image (for edits/inpainting)
+	Denoise  string `json:"denoise,omitempty"` // denoising strength (for variations)
 }
 
 // Size holds width/height for a size preset.
@@ -62,16 +62,36 @@ func (m FieldMapping) IsZero() bool {
 }
 
 func mergeMapping(base, override FieldMapping) FieldMapping {
-	if override.Prompt != "" { base.Prompt = override.Prompt }
-	if override.Negative != "" { base.Negative = override.Negative }
-	if override.Width != "" { base.Width = override.Width }
-	if override.Height != "" { base.Height = override.Height }
-	if override.Seed != "" { base.Seed = override.Seed }
-	if override.Steps != "" { base.Steps = override.Steps }
-	if override.CFG != "" { base.CFG = override.CFG }
-	if override.Image != "" { base.Image = override.Image }
-	if override.Mask != "" { base.Mask = override.Mask }
-	if override.Denoise != "" { base.Denoise = override.Denoise }
+	if override.Prompt != "" {
+		base.Prompt = override.Prompt
+	}
+	if override.Negative != "" {
+		base.Negative = override.Negative
+	}
+	if override.Width != "" {
+		base.Width = override.Width
+	}
+	if override.Height != "" {
+		base.Height = override.Height
+	}
+	if override.Seed != "" {
+		base.Seed = override.Seed
+	}
+	if override.Steps != "" {
+		base.Steps = override.Steps
+	}
+	if override.CFG != "" {
+		base.CFG = override.CFG
+	}
+	if override.Image != "" {
+		base.Image = override.Image
+	}
+	if override.Mask != "" {
+		base.Mask = override.Mask
+	}
+	if override.Denoise != "" {
+		base.Denoise = override.Denoise
+	}
 	return base
 }
 

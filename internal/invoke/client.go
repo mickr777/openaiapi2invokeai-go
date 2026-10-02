@@ -52,12 +52,12 @@ func NewClientWithOptions(baseURL string, timeout time.Duration, log *slog.Logge
 		versionMode = "auto"
 	}
 	return &Client{
-		baseURL: strings.TrimRight(baseURL, "/"),
-		httpClient: &http.Client{Timeout: timeout},
-		log: log,
-		authMode: authMode,
-		email: options.Email,
-		password: options.Password,
+		baseURL:     strings.TrimRight(baseURL, "/"),
+		httpClient:  &http.Client{Timeout: timeout},
+		log:         log,
+		authMode:    authMode,
+		email:       options.Email,
+		password:    options.Password,
 		versionMode: versionMode,
 	}
 }
@@ -76,8 +76,8 @@ func (c *Client) ensureToken(ctx context.Context) error {
 	}
 
 	body, err := json.Marshal(map[string]any{
-		"email": c.email,
-		"password": c.password,
+		"email":       c.email,
+		"password":    c.password,
 		"remember_me": false,
 	})
 	if err != nil {

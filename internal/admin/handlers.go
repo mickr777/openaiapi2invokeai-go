@@ -232,12 +232,12 @@ func (h *Handler) workflowInspect(w http.ResponseWriter, r *http.Request) {
 	_, modelExists := h.registry.Get(suggestion.SuggestedModelID)
 
 	h.render(w, "workflow_inspect.html", map[string]any{
-		"Title":         "Inspect " + name,
-		"Nav":           "workflows",
-		"Filename":      name,
-		"Nodes":         nodes,
-		"Suggestion":    suggestion,
-		"ModelExists":   modelExists,
+		"Title":       "Inspect " + name,
+		"Nav":         "workflows",
+		"Filename":    name,
+		"Nodes":       nodes,
+		"Suggestion":  suggestion,
+		"ModelExists": modelExists,
 	})
 }
 
@@ -386,16 +386,16 @@ func (h *Handler) modelSave(w http.ResponseWriter, r *http.Request) {
 		Mask: r.FormValue("edit_map_mask"), Denoise: r.FormValue("edit_map_denoise"),
 	}
 	entry := workflow.ModelEntry{
-		ID: r.FormValue("id"),
-		Workflow: r.FormValue("workflow"),
-		EditWorkflow: r.FormValue("edit_workflow"),
-		VariantWorkflow: r.FormValue("variant_workflow"),
-		OutputNode: r.FormValue("output_node"),
-		EditOutputNode: r.FormValue("edit_output_node"),
+		ID:                r.FormValue("id"),
+		Workflow:          r.FormValue("workflow"),
+		EditWorkflow:      r.FormValue("edit_workflow"),
+		VariantWorkflow:   r.FormValue("variant_workflow"),
+		OutputNode:        r.FormValue("output_node"),
+		EditOutputNode:    r.FormValue("edit_output_node"),
 		VariantOutputNode: r.FormValue("variant_output_node"),
-		Mapping: generationMapping,
+		Mapping:           generationMapping,
 		GenerationMapping: generationMapping,
-		EditMapping: editMapping,
+		EditMapping:       editMapping,
 	}
 
 	// Parse size presets

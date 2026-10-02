@@ -224,4 +224,3 @@ func InferPromptSize(prompt string) (int, int, bool) {
 		return 0, 0, false
 	}
 }
-

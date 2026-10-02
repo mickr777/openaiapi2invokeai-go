@@ -50,7 +50,7 @@ func TestPasswordAuthAddsBearerToken(t *testing.T) {
 
 	c := NewClientWithOptions(srv.URL, time.Second, testLogger(), ClientOptions{
 		AuthMode: "password",
-		Email: "alice@example.test",
+		Email:    "alice@example.test",
 		Password: "secret",
 	})
 	if _, err := c.GetQueueItemStatus(t.Context(), 1); err != nil {
@@ -92,7 +92,7 @@ func TestPasswordAuthRetriesOnceAfter401(t *testing.T) {
 
 	c := NewClientWithOptions(srv.URL, time.Second, testLogger(), ClientOptions{
 		AuthMode: "password",
-		Email: "alice@example.test",
+		Email:    "alice@example.test",
 		Password: "secret",
 	})
 	if _, err := c.GetQueueItemStatus(t.Context(), 1); err != nil {
@@ -111,7 +111,7 @@ func TestLoginFailureDoesNotExposePasswordOrResponseBody(t *testing.T) {
 
 	c := NewClientWithOptions(srv.URL, time.Second, testLogger(), ClientOptions{
 		AuthMode: "password",
-		Email: "alice@example.test",
+		Email:    "alice@example.test",
 		Password: "super-secret-password",
 	})
 	_, err := c.GetQueueItemStatus(t.Context(), 1)

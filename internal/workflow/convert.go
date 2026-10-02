@@ -223,4 +223,3 @@ func sanitizeEditorSentinels(graph map[string]any) {
 		}
 	}
 }
-

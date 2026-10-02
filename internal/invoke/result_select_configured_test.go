@@ -4,7 +4,7 @@ import "testing"
 
 func TestSelectImageResultHonorsConfiguredSourceNode(t *testing.T) {
 	g := Graph{"nodes": map[string]any{
-		"input": map[string]any{"id": "input", "type": "image", "is_intermediate": false},
+		"input":  map[string]any{"id": "input", "type": "image", "is_intermediate": false},
 		"decode": map[string]any{"id": "decode", "type": "decode", "is_intermediate": false},
 	}}
 	d := detailWithImages(
